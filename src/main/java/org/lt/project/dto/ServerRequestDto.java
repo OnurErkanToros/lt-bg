@@ -16,6 +16,7 @@ public class ServerRequestDto {
     private String remoteFilePath;
 
     private String fileName = "blokip.conf";
+    private boolean isActive;
 
     public String getName() {
         return name;
@@ -71,5 +72,13 @@ public class ServerRequestDto {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

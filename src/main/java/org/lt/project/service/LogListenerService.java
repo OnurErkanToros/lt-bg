@@ -23,6 +23,8 @@ public class LogListenerService extends LogListenerAdapter {
     private final Pattern pattern;
     private Pattern accessPattern;
     private Tailer tailer;
+    private boolean isServiceRunning = false;
+
 
     public LogListenerService(SuspectIpService suspectIpService) {
         this.suspectIpService=suspectIpService;
@@ -32,6 +34,9 @@ public class LogListenerService extends LogListenerAdapter {
 
     public Result startService(){
         try{
+            if(isServiceRunning){
+                return new ErrorResult("Servis zaten çalışıyor.");
+            }
             String logFilePath="src/main/resources/error.log";
             File logFile = new File(logFilePath);
             TailerListener tailerListener = this;
@@ -43,6 +48,7 @@ public class LogListenerService extends LogListenerAdapter {
                     .get();
             Executor executor = newSingleThreadExecutor();
             executor.execute(tailer);
+            isServiceRunning=true;
             return new SuccessResult("Başarılya başlatıldı");
         }catch (Exception e){
             return new ErrorResult("Başlatılırken bir hata oluştu. "+e.getMessage());
@@ -51,7 +57,7 @@ public class LogListenerService extends LogListenerAdapter {
     }
     public Result stopService(){
         try{
-            if(tailer!=null){
+            if(isServiceRunning){
                 tailer.close();
                 return new SuccessResult("Başarıyla durduruldu.");
             }else {

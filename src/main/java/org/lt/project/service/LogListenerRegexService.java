@@ -31,7 +31,7 @@ public class LogListenerRegexService {
 
     public Result addPattern(LogListenerPatternRequestDto logListenerPatternRequestDto, String creUser) {
         LogListenerPatternEntity savedLogListenerPatternEntity = logListenerRegexRepository.save(LogListenerPatternConverter.convert(logListenerPatternRequestDto,creUser));
-        if(savedLogListenerPatternEntity==null){
+        if(savedLogListenerPatternEntity!=null){
             return new SuccessResult();
         }else{
             return new ErrorResult("ekleme başarısız");

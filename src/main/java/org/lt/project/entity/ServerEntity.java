@@ -1,6 +1,8 @@
 package org.lt.project.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.util.Date;
 
@@ -24,11 +26,13 @@ public class ServerEntity{
     private Date createdAt;
     @Column(name = "created_by")
     private String createdBy;
+    @Column(name = "is_active",nullable = false)
+    private boolean isActive=false;
 
     public ServerEntity() {
     }
 
-    public ServerEntity(String name, String url, String username, String password, int port, String remoteFilePath,String fileName, Date createdAt, String createdBy) {
+    public ServerEntity(String name, String url, String username, String password, int port, String remoteFilePath,String fileName, Date createdAt, String createdBy,boolean isActive) {
         this.name = name;
         this.url = url;
         this.username = username;
@@ -38,6 +42,7 @@ public class ServerEntity{
         this.fileName=fileName;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
+        this.isActive = isActive;
     }
 
     public int getId() {
@@ -118,5 +123,13 @@ public class ServerEntity{
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

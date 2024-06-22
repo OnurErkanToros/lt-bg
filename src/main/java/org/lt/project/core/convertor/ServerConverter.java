@@ -19,7 +19,9 @@ public class ServerConverter {
                 serverRequestDto.getRemoteFilePath(),
                 serverRequestDto.getFileName(),
                 new Date(),
-                createdBy);
+                createdBy,
+                serverRequestDto.isActive()
+                );
     }
 
     public static ServerResponseDto convert(ServerEntity serverEntity) {
@@ -33,6 +35,8 @@ public class ServerConverter {
                 serverEntity.getRemoteFilePath(),
                 serverEntity.getFileName(),
                 serverEntity.getCreatedBy(),
-                serverEntity.getCreatedAt());
+                serverEntity.getCreatedAt(),
+                serverEntity.isActive()
+        );
     }
 }

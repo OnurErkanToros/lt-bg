@@ -1,20 +1,23 @@
 package org.lt.project.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 public class ServerResponseDto {
-    public int id;
-    public String name;
-    public String url;
-    public String username;
-    public String password;
-    public int port;
-    public String remoteFilePath;
-    public String fileName;
-    public String createdBy;
-    public Date createdAt;
+    private int id;
+    private String name;
+    private String url;
+    private String username;
+    private String password;
+    private int port;
+    private String remoteFilePath;
+    private String fileName;
+    private String createdBy;
+    private Date createdAt;
+    private boolean active;
 
-    public ServerResponseDto(int id,String name, String url, String username, String password, int port, String remoteFilePath, String fileName, String createdBy, Date createdAt) {
+    public ServerResponseDto(int id,String name, String url, String username, String password, int port, String remoteFilePath, String fileName, String createdBy, Date createdAt, boolean active) {
         this.id=id;
         this.name = name;
         this.url = url;
@@ -25,6 +28,7 @@ public class ServerResponseDto {
         this.fileName = fileName;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
+        this.active = active;
     }
 
     public ServerResponseDto() {
@@ -108,5 +112,13 @@ public class ServerResponseDto {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

@@ -4,13 +4,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import org.lt.project.core.result.DataResult;
 import org.lt.project.core.result.ErrorResult;
 import org.lt.project.core.result.Result;
+import org.lt.project.dto.AbuseBlackListResponseDto;
 import org.lt.project.dto.AbuseCheckRequestDto;
 import org.lt.project.service.AbuseDBApiService;
 import org.lt.project.service.AbuseDBService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -24,16 +28,20 @@ public class AbuseApi {
         this.abuseDBService = abuseDBService;
     }
 
-    @GetMapping("check-ip")
+    @PostMapping("check-ip")
     public Result checkIp(@Valid @RequestParam @Positive int maxAgeInDays,
                           @RequestParam @Pattern(regexp = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b") String ipAddress) {
         return abuseApiService.checkIp(maxAgeInDays,ipAddress);
     }
 
-    @GetMapping("blacklist/refresh")
+    @PostMapping("blacklist/refresh")
     public Result refreshBlackList() {
-            return abuseDBService.refreshBlackList(abuseApiService.getBlackList().getData());
-
+        DataResult<List<AbuseBlackListResponseDto>> upToDateBlacklistDataResult = abuseApiService.getBlackList();
+        if(upToDateBlacklistDataResult.isSuccess()){
+            return abuseDBService.refreshBlackList(upToDateBlacklistDataResult.getData());
+        }else {
+            return upToDateBlacklistDataResult;
+        }
     }
 
     @GetMapping("blacklist/all")

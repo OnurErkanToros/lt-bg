@@ -58,10 +58,10 @@ public class AllSuspectIpService {
     public DataResult<AllSuspectIpEntity> addSuspectIp(AllSuspectIpEntity allSuspectIpEntity) {
         try{
             if (checkDuplicateIp(allSuspectIpEntity.getIpAddress())) {
+                return new ErrorDataResult<>("Bu ip zaten listede");
+            } else {
                 AllSuspectIpEntity savedSuspectIp = allSuspectIpRepository.save(allSuspectIpEntity);
                 return new SuccessDataResult<>(savedSuspectIp);
-            } else {
-                return new ErrorDataResult<>("Bu ip zaten listede");
             }
         }catch (Exception e){
             return new ErrorDataResult<>("listeye eklerken bir hata oluştu.");

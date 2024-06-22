@@ -15,7 +15,7 @@ public class LtValueService {
         this.repository = repository;
     }
     
-    public LtValueEntity getValueByKey(String key) throws Exception{
+    public LtValueEntity getValueByKey(String key){
         Optional<LtValueEntity> ltValueOptional =  repository.findByMyKey(key);
         if(ltValueOptional.isPresent()){
             return ltValueOptional.get();

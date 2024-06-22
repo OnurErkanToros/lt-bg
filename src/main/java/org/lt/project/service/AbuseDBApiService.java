@@ -1,7 +1,9 @@
 package org.lt.project.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -95,11 +97,20 @@ public class AbuseDBApiService {
             Response response = okHttpClient.newCall(request).execute();
             ResponseBody responseBody = response.body();
             if (responseBody != null) {
-                JsonNode jsonNode = objectMapper.readTree(responseBody.string()).get("data");
-                List<AbuseBlackListResponseDto> list = Arrays.asList(objectMapper.readValue(jsonNode.toString(), AbuseBlackListResponseDto[].class));
-                responseBody.close();
-                response.close();
-                return new SuccessDataResult<>(list);
+                String json = responseBody.string();
+                JsonNode dataNode = objectMapper.readTree(json).get("data");
+                JsonNode errorsNode = objectMapper.readTree(json).get("errors").get(0).get("detail");
+                if(errorsNode==null && dataNode!=null){
+                    List<AbuseBlackListResponseDto> list = Arrays.asList(objectMapper.readValue(dataNode.toString(), AbuseBlackListResponseDto[].class));
+                    responseBody.close();
+                    response.close();
+                    return new SuccessDataResult<>(list);
+                } else if (errorsNode!=null) {
+                    return new ErrorDataResult<>(errorsNode.asText());
+                }else{
+                    return new ErrorDataResult<>("Abuse ile ilgili bir sorun var.");
+                }
+
             }
         } catch (Exception e) {
             return new ErrorDataResult<>(e.getMessage());
