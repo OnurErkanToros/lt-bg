@@ -57,7 +57,7 @@ public class ServerService {
 
     public DataResult<ServerResponseDto> addServer(ServerRequestDto serverRequestDto) {
         ServerEntity serverEntity = serverRepository.save(ServerConverter.convert(serverRequestDto, "onur"));
-        return new SuccessDataResult<>(ServerConverter.convert(serverEntity));
+        return new SuccessDataResult<>("Sunucu başarıyla eklendi.",ServerConverter.convert(serverEntity));
     }
     public Result deleteServer(int id){
         Optional<ServerEntity> serverEntityOptional = serverRepository.findById(id);
@@ -76,6 +76,20 @@ public class ServerService {
             return new ErrorDataResult<>("server listesi boş");
         } else {
             return new SuccessDataResult<>(serverResponseDtoList);
+        }
+    }
+    public Result deleteServerByIdList(List<Integer> serverIds){
+        try {
+            serverRepository.deleteAllById(serverIds);
+            long count = serverRepository.countByIdIn(serverIds);
+            if(count==0){
+                return new SuccessResult("Kayıtlar başarıyla silindi.");
+            } else if (count<serverIds.size()) {
+                return new ErrorResult("Kayıtların bazıları silinemedi.");
+            }
+            return new ErrorResult("Kayıtlar silinemedi.");
+        } catch (Exception e) {
+            return new ErrorResult("Kayıtlar silinemedi.");
         }
     }
 }

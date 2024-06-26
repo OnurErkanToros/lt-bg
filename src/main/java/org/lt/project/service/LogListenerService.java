@@ -5,6 +5,7 @@ import org.apache.commons.io.input.TailerListener;
 import org.lt.project.core.result.ErrorResult;
 import org.lt.project.core.result.Result;
 import org.lt.project.core.result.SuccessResult;
+import org.lt.project.dto.SuspectIpDto;
 import org.lt.project.entity.SuspectIPEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,6 @@ public class LogListenerService extends LogListenerAdapter {
     private SuspectIpService suspectIpService;
 
     private final Pattern pattern;
-    private Pattern accessPattern;
     private Tailer tailer;
     private boolean isServiceRunning = false;
 
@@ -49,7 +49,7 @@ public class LogListenerService extends LogListenerAdapter {
             Executor executor = newSingleThreadExecutor();
             executor.execute(tailer);
             isServiceRunning=true;
-            return new SuccessResult("Başarılya başlatıldı");
+            return new SuccessResult("Başarıyla başlatıldı");
         }catch (Exception e){
             return new ErrorResult("Başlatılırken bir hata oluştu. "+e.getMessage());
         }
@@ -76,14 +76,13 @@ public class LogListenerService extends LogListenerAdapter {
                 String ip = matcher.group(1);
                 String host = matcher.group(2);
                 Integer accessForbiddenNumber = getAccessForbiddenNumber(line);
-                System.out.println(ip);
-                suspectIpService.saveSuspectIp(new SuspectIPEntity(ip, host, accessForbiddenNumber));
+                suspectIpService.saveSuspectIp(new SuspectIpDto(ip, host,line, accessForbiddenNumber));
             }
     }
 
     private Integer getAccessForbiddenNumber(String line) {
         String accessPatternString = ".*\\*(\\d+) access forbidden by rule.*";
-        accessPattern = Pattern.compile(accessPatternString);
+        Pattern accessPattern = Pattern.compile(accessPatternString);
         Matcher accessMatcher = accessPattern.matcher(line);
         if (accessMatcher.matches()) {
             return Integer.valueOf(accessMatcher.group(1));

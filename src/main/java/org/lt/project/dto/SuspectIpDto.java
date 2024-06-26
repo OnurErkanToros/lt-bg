@@ -6,6 +6,17 @@ public class SuspectIpDto {
     private String whichHost;
     private String line;
     private int accessForbiddenNumber;
+
+    public SuspectIpDto() {
+    }
+
+    public SuspectIpDto(String ip, String whichHost, String line, int accessForbiddenNumber) {
+        this.ip = ip;
+        this.whichHost = whichHost;
+        this.line = line;
+        this.accessForbiddenNumber = accessForbiddenNumber;
+    }
+
     public String getIp() {
         return ip;
     }

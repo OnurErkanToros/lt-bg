@@ -14,11 +14,13 @@ public class SuspectIPEntity {
     private String whichHost;
     @Column(name = "access_forbidden_number")
     private int accessForbiddenNumber;
+    @Column
+    private String line;
 
     public SuspectIPEntity() {
     }
 
-    public SuspectIPEntity(String ipAddress, String whichHost, int accessForbiddenNumber) {
+    public SuspectIPEntity(String ipAddress, String whichHost, int accessForbiddenNumber,String line) {
         this.ipAddress = ipAddress;
         this.whichHost = whichHost;
         this.accessForbiddenNumber = accessForbiddenNumber;
@@ -47,5 +49,12 @@ public class SuspectIPEntity {
     public void setAccessForbiddenNumber(int accessForbiddenNumber) {
         this.accessForbiddenNumber = accessForbiddenNumber;
     }
-    
+
+    public String getLine() {
+        return line;
+    }
+
+    public void setLine(String line) {
+        this.line = line;
+    }
 }
