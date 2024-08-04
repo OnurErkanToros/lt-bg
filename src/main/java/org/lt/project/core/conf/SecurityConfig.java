@@ -19,6 +19,7 @@ public class SecurityConfig {
         registrationBean.addUrlPatterns("/lt-api/1.0/abuse-key/*");
         registrationBean.addUrlPatterns("/lt-api/1.0/all-suspect-ip/*");
         registrationBean.addUrlPatterns("/lt-api/1.0/server/*");
+        registrationBean.addUrlPatterns("/lt-api/1.0/suspect-ip/*");
         return registrationBean;
     }
 

@@ -1,5 +1,6 @@
 package org.lt.project.api;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.lt.project.core.result.DataResult;
 import org.lt.project.core.result.Result;
 import org.lt.project.dto.SuspectIpDto;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/lt-api/1.0/suspect-ip/")
+@SecurityRequirement(name = "Authorization")
 public class SuspectIpController {
     private SuspectIpService suspectIpService;
 
