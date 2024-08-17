@@ -95,16 +95,17 @@ public class AbuseDBApiService {
             ResponseBody responseBody = response.body();
             if (responseBody != null) {
                 String json = responseBody.string();
-                JsonNode dataNode = objectMapper.readTree(json).get("data");
-                JsonNode errorsNode = objectMapper.readTree(json).get("errors").get(0).get("detail");
-                if(errorsNode==null && dataNode!=null){
+                JsonNode allNode = objectMapper.readTree(json);
+                if(allNode.has("data")){
+                    JsonNode dataNode = allNode.get("data");
                     List<AbuseBlackListResponseDto> list = Arrays.asList(objectMapper.readValue(dataNode.toString(), AbuseBlackListResponseDto[].class));
                     responseBody.close();
                     response.close();
                     return new SuccessDataResult<>(list);
-                } else if (errorsNode!=null) {
+                }else if(allNode.has("errors")){
+                    JsonNode errorsNode = objectMapper.readTree(json).get("errors").get(0).get("detail");
                     return new ErrorDataResult<>(errorsNode.asText());
-                }else{
+                }else {
                     return new ErrorDataResult<>("Abuse ile ilgili bir sorun var.");
                 }
 

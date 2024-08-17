@@ -1,6 +1,7 @@
 package org.lt.project.api;
 
-import org.lt.project.dto.UserRequestDto;
+import org.lt.project.dto.UserLoginRequestDto;
+import org.lt.project.dto.UserCreateRequestDto;
 import org.lt.project.dto.resultDto.Result;
 import org.lt.project.dto.resultDto.SuccessResult;
 import org.lt.project.service.AuthenticationService;
@@ -16,11 +17,11 @@ public class AuthenticationApi {
     }
 
     @PostMapping("login")
-    public Result login(@RequestBody UserRequestDto requestDto) {
+    public Result login(@RequestBody UserLoginRequestDto requestDto) {
         return authenticationService.authenticateUser(requestDto);
     }
     @PostMapping("create")
-    public Result createUser(@RequestBody UserRequestDto requestDto) {
+    public Result createUser(@RequestBody UserCreateRequestDto requestDto) {
         return authenticationService.createUser(requestDto);
     }
 

@@ -1,7 +1,8 @@
 package org.lt.project.service;
 
-import org.lt.project.dto.UserRequestDto;
-import org.lt.project.dto.UserResponseDto;
+import org.lt.project.dto.UserLoginRequestDto;
+import org.lt.project.dto.UserCreateRequestDto;
+import org.lt.project.dto.UserLoginResponseDto;
 import org.lt.project.dto.resultDto.DataResult;
 import org.lt.project.dto.resultDto.SuccessDataResult;
 import org.lt.project.model.User;
@@ -24,15 +25,15 @@ public class AuthenticationService {
         this.authenticationManager = authenticationManager;
     }
 
-    public DataResult<User> createUser(UserRequestDto userRequestDto) {
-        return new SuccessDataResult<>(userService.createUser(userRequestDto));
+    public DataResult<User> createUser(UserCreateRequestDto userCreateRequestDto) {
+        return new SuccessDataResult<>(userService.createUser(userCreateRequestDto));
     }
 
-    public DataResult<UserResponseDto> authenticateUser(UserRequestDto userRequestDto) {
+    public DataResult<UserLoginResponseDto> authenticateUser(UserLoginRequestDto userRequestDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userRequestDto.username(), userRequestDto.password()));
         if (authentication.isAuthenticated()) {
             return new SuccessDataResult<>(
-                    UserResponseDto.builder()
+                    UserLoginResponseDto.builder()
                             .username(userRequestDto.username())
                             .token(jwtTokenService.generateToken(userRequestDto.username())).build()
             );

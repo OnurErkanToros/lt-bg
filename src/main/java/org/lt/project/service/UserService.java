@@ -1,7 +1,7 @@
 package org.lt.project.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.lt.project.dto.UserRequestDto;
+import org.lt.project.dto.UserCreateRequestDto;
 import org.lt.project.model.User;
 import org.lt.project.repository.UserRepository;
 import org.lt.project.security.service.JwtTokenService;
@@ -50,12 +50,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
-    public User createUser(UserRequestDto userRequestDto) {
+    public User createUser(UserCreateRequestDto userCreateRequestDto) {
         User user = User.builder()
-                .name(userRequestDto.name())
-                .username(userRequestDto.username())
-                .password(bCryptPasswordEncoder.encode(userRequestDto.password()))
-                .authorities(userRequestDto.authorities())
+                .name(userCreateRequestDto.name())
+                .username(userCreateRequestDto.username())
+                .password(bCryptPasswordEncoder.encode(userCreateRequestDto.password()))
+                .authorities(userCreateRequestDto.authorities())
                 .accountNonExpired(true)
                 .credentialsNonExpired(true)
                 .isEnabled(true)

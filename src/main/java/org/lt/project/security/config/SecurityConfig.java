@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 .requestMatchers("/lt-api/1.0/server/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/abuse-key/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/abuse/*").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/abuse/blacklist/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-listener/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-pattern/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/suspect-ip/*").hasRole("USER")

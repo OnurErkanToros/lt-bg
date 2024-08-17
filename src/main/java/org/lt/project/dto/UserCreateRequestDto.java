@@ -6,7 +6,7 @@ import org.lt.project.model.Role;
 import java.util.Set;
 
 @Builder
-public record UserRequestDto(
+public record UserCreateRequestDto(
         String name,
         String username,
         String password,
