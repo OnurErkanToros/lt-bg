@@ -2,18 +2,28 @@ package org.lt.project.core.convertor;
 
 import org.lt.project.dto.LogListenerPatternRequestDto;
 import org.lt.project.dto.LogListenerPatternResponseDto;
-import org.lt.project.entity.LogListenerPatternEntity;
+import org.lt.project.model.LogListenerPattern;
+import org.lt.project.service.UserService;
+
+import java.util.Date;
 
 public class LogListenerPatternConverter {
-    public static LogListenerPatternResponseDto convert(LogListenerPatternEntity entity){
-        return new LogListenerPatternResponseDto(entity.getId(),
-                entity.getPattern(),
-                entity.getExplanation(),
-                entity.getCreUser(),
-                entity.getCreDate());
+    public static LogListenerPatternResponseDto convert(LogListenerPattern entity) {
+        return LogListenerPatternResponseDto.builder()
+                .id(entity.getId())
+                .pattern(entity.getPattern())
+                .explanation(entity.getExplanation())
+                .creUser(entity.getPattern())
+                .creDate(entity.getCreatedAt())
+                .build();
     }
 
-    public static LogListenerPatternEntity convert(LogListenerPatternRequestDto logListenerPatternRequestDto, String creUser) {
-        return new LogListenerPatternEntity(logListenerPatternRequestDto.getPattern(), logListenerPatternRequestDto.getExplanation(), creUser);
+    public static LogListenerPattern convert(LogListenerPatternRequestDto logListenerPatternRequestDto) {
+        return LogListenerPattern.builder()
+                .pattern(logListenerPatternRequestDto.pattern())
+                .explanation(logListenerPatternRequestDto.explanation())
+                .createdBy(UserService.getAuthenticatedUser())
+                .createdAt(new Date())
+                .build();
     }
 }

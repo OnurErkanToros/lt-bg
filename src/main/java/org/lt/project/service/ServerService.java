@@ -3,10 +3,10 @@ package org.lt.project.service;
 
 import org.lt.project.core.FileUtil;
 import org.lt.project.core.convertor.ServerConverter;
-import org.lt.project.core.result.*;
 import org.lt.project.dto.ServerRequestDto;
 import org.lt.project.dto.ServerResponseDto;
-import org.lt.project.entity.ServerEntity;
+import org.lt.project.dto.resultDto.*;
+import org.lt.project.model.Server;
 import org.lt.project.repository.ServerRepository;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +32,12 @@ public class ServerService {
             for (ServerResponseDto serverResponseDto : dataResult.getData()) {
                 fileUtil.saveFile(ipList, "blockip.conf");
                 Result result = fileUtil.sendFileViaFtp(
-                        serverResponseDto.getFileName(),
-                        serverResponseDto.getRemoteFilePath(),
-                        serverResponseDto.getUrl(),
-                        serverResponseDto.getPort(),
-                        serverResponseDto.getUsername(),
-                        serverResponseDto.getPassword());
+                        serverResponseDto.fileName(),
+                        serverResponseDto.remoteFilePath(),
+                        serverResponseDto.url(),
+                        serverResponseDto.port(),
+                        serverResponseDto.username(),
+                        serverResponseDto.password());
                 resultList.add(result);
             }
         }else {
@@ -46,7 +46,7 @@ public class ServerService {
         return resultList;
     }
     public DataResult<ServerResponseDto> getServerById(int id){
-        Optional<ServerEntity> serverEntityOptional = serverRepository.findById(id);
+        Optional<Server> serverEntityOptional = serverRepository.findById(id);
         if (serverEntityOptional.isPresent()){
             ServerResponseDto serverResponseDto = ServerConverter.convert(serverEntityOptional.get());
             return new SuccessDataResult<>(serverResponseDto);
@@ -56,11 +56,11 @@ public class ServerService {
     }
 
     public DataResult<ServerResponseDto> addServer(ServerRequestDto serverRequestDto) {
-        ServerEntity serverEntity = serverRepository.save(ServerConverter.convert(serverRequestDto, "onur"));
-        return new SuccessDataResult<>("Sunucu başarıyla eklendi.",ServerConverter.convert(serverEntity));
+        Server server = serverRepository.save(ServerConverter.convert(serverRequestDto));
+        return new SuccessDataResult<>("Sunucu başarıyla eklendi.", ServerConverter.convert(server));
     }
     public Result deleteServer(int id){
-        Optional<ServerEntity> serverEntityOptional = serverRepository.findById(id);
+        Optional<Server> serverEntityOptional = serverRepository.findById(id);
         if (serverEntityOptional.isPresent()){
             serverRepository.delete(serverEntityOptional.get());
             return new SuccessResult(String.format("%s başarıyla silindi.",serverEntityOptional.get().getName()));
@@ -70,9 +70,9 @@ public class ServerService {
     }
 
     public DataResult<List<ServerResponseDto>> getServerList() {
-        List<ServerEntity> serverEntityList = serverRepository.findAll();
-        List<ServerResponseDto> serverResponseDtoList = serverEntityList.stream().map(ServerConverter::convert).toList();
-        if (serverEntityList.isEmpty()) {
+        List<Server> serverList = serverRepository.findAll();
+        List<ServerResponseDto> serverResponseDtoList = serverList.stream().map(ServerConverter::convert).toList();
+        if (serverList.isEmpty()) {
             return new ErrorDataResult<>("server listesi boş");
         } else {
             return new SuccessDataResult<>(serverResponseDtoList);

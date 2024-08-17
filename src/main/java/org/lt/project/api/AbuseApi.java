@@ -4,14 +4,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
-import org.lt.project.core.result.DataResult;
-import org.lt.project.core.result.ErrorResult;
-import org.lt.project.core.result.Result;
 import org.lt.project.dto.AbuseBlackListResponseDto;
-import org.lt.project.dto.AbuseCheckRequestDto;
+import org.lt.project.dto.resultDto.DataResult;
+import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.AbuseDBApiService;
 import org.lt.project.service.AbuseDBService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

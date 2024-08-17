@@ -1,4 +1,4 @@
-package org.lt.project.core.result;
+package org.lt.project.dto.resultDto;
 
 public class SuccessDataResult<T> extends DataResult<T>{
 

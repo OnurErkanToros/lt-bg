@@ -3,9 +3,9 @@ package org.lt.project.core;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-import org.lt.project.core.result.ErrorResult;
-import org.lt.project.core.result.Result;
-import org.lt.project.core.result.SuccessResult;
+import org.lt.project.dto.resultDto.ErrorResult;
+import org.lt.project.dto.resultDto.Result;
+import org.lt.project.dto.resultDto.SuccessResult;
 import org.springframework.stereotype.Component;
 
 import java.io.*;

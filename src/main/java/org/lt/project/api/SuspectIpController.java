@@ -1,10 +1,12 @@
 package org.lt.project.api;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.lt.project.core.result.DataResult;
-import org.lt.project.core.result.Result;
-import org.lt.project.dto.SuspectIpDto;
+import org.lt.project.dto.SuspectIpRequestDto;
+import org.lt.project.dto.SuspectIpResponseDto;
+import org.lt.project.dto.resultDto.DataResult;
+import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.SuspectIpService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +22,12 @@ public class SuspectIpController {
         this.suspectIpService = suspectIpService;
     }
 
-    public DataResult<List<SuspectIpDto>> getSuspectIpList(){
+    public DataResult<List<SuspectIpResponseDto>> getSuspectIpList() {
         return suspectIpService.getAllSuspectIpList();
     }
-    public Result addSuspectIp(SuspectIpDto suspectIpDto){
-        return suspectIpService.saveSuspectIp(suspectIpDto);
+
+    @GetMapping("add-suspect")
+    public Result addSuspectIp(SuspectIpRequestDto suspectIpRequestDto) {
+        return suspectIpService.saveSuspectIp(suspectIpRequestDto);
     }
 }

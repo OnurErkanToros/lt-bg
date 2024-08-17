@@ -1,20 +1,18 @@
 package org.lt.project.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.lt.project.core.result.DataResult;
-import org.lt.project.core.result.ErrorDataResult;
-import org.lt.project.core.result.SuccessDataResult;
 import org.lt.project.dto.AbuseBlackListResponseDto;
 import org.lt.project.dto.AbuseCheckResponseDto;
-import org.lt.project.entity.AbuseDBLogEntity;
-import org.lt.project.entity.AllSuspectIpEntity;
+import org.lt.project.dto.resultDto.DataResult;
+import org.lt.project.dto.resultDto.ErrorDataResult;
+import org.lt.project.dto.resultDto.SuccessDataResult;
+import org.lt.project.model.AbuseDBCheckLog;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -24,27 +22,22 @@ import java.util.List;
 @Service
 public class AbuseDBApiService {
     private final OkHttpClient okHttpClient;
-    private final LtValueService valueService;
     private final AbuseDBKeyService keyService;
     private final AbuseDBService abuseDBService;
-    private final AllSuspectIpService allSuspectIpService;
+    @Value("${abuse.api.url}")
     private String url;
     private final ObjectMapper objectMapper;
 
     public AbuseDBApiService(
-            LtValueService ltValueService,
-            AbuseDBKeyService abuseDBKeyService, AbuseDBService abuseDBService, AllSuspectIpService allSuspectIpService) {
+            AbuseDBKeyService abuseDBKeyService, AbuseDBService abuseDBService) {
         this.abuseDBService = abuseDBService;
-        this.allSuspectIpService = allSuspectIpService;
         this.okHttpClient = new OkHttpClient();
-        this.valueService = ltValueService;
         this.keyService = abuseDBKeyService;
         this.objectMapper = new ObjectMapper();
     }
 
     public DataResult<AbuseCheckResponseDto> checkIp(int maxAgeInDays, String ipAddress) {
         try {
-            url = valueService.getValueByKey("abuseUrl").getMyValue();
             if (maxAgeInDays == 0) {
                 maxAgeInDays = 90;
             }
@@ -52,29 +45,34 @@ public class AbuseDBApiService {
             Request request = new Request.Builder()
                     .url(checkUrl)
                     .header("Accept", "application/json")
-                    .header("key", keyService.getLastActiveKey().getData().getAbuseKey())
+                    .header("key", keyService.getLastActiveKey().getData().abuseKey())
                     .build();
             try (Response response = okHttpClient.newCall(request).execute();
                  ResponseBody responseBody = response.body()) {
                 JsonNode jsonNode = objectMapper.readTree(responseBody.string()).get("data");
                 AbuseCheckResponseDto responseDto = objectMapper.readValue(jsonNode.toString(), AbuseCheckResponseDto.class);
                 if (responseDto != null) {
-                    allSuspectIpService.addSuspectIp(new AllSuspectIpEntity(responseDto.getIpAddress(), "check", new Date(), false));
-                    abuseDBService.addAbuseLog(new AbuseDBLogEntity(
-                            responseDto.getIpAddress(),
-                            responseDto.getIsPublic(),
-                            responseDto.getIpVersion(),
-                            responseDto.getIsWhitelisted(),
-                            responseDto.getAbuseConfidenceScore(),
-                            responseDto.getCountryCode(),
-                            responseDto.getCountryName(),
-                            responseDto.getUsageType(),
-                            responseDto.getIsp(),
-                            responseDto.getDomain(),
-                            responseDto.getIsTor(),
-                            responseDto.getTotalReports(),
-                            responseDto.getNumDistinctUsers(),
-                            responseDto.getLastReportedAt()));
+                    String username = UserService.getAuthenticatedUser();
+                    abuseDBService.addAbuseLog(
+                            AbuseDBCheckLog.builder()
+                                    .ipAddress(responseDto.ipAddress())
+                                    .usageType(responseDto.usageType())
+                                    .ipVersion(responseDto.ipVersion())
+                                    .numDistinctUsers(responseDto.numDistinctUsers())
+                                    .abuseConfidenceScore(responseDto.abuseConfidenceScore())
+                                    .isp(responseDto.isp())
+                                    .countryCode(responseDto.countryCode())
+                                    .countryName(responseDto.countryName())
+                                    .domain(responseDto.domain())
+                                    .isTor(responseDto.isTor())
+                                    .isBanned(false)
+                                    .isPublic(responseDto.isPublic())
+                                    .isWhiteListed(responseDto.isWhitelisted())
+                                    .checkBy(username)
+                                    .checkDate(new Date())
+                                    .lastReportedAt(responseDto.lastReportedAt())
+                                    .build()
+                    );
                 }
                 return new SuccessDataResult<>(responseDto);
             }catch (Exception e){
@@ -87,12 +85,11 @@ public class AbuseDBApiService {
 
     public DataResult<List<AbuseBlackListResponseDto>> getBlackList() {
         try {
-            url = valueService.getValueByKey("abuseUrl").getMyValue();
             String blackListUrl = this.url + "blacklist";
             Request request = new Request.Builder()
                     .url(blackListUrl)
                     .header("Accept", "application/json")
-                    .header("key", keyService.getLastActiveKey().getData().getAbuseKey())
+                    .header("key", keyService.getLastActiveKey().getData().abuseKey())
                     .build();   
             Response response = okHttpClient.newCall(request).execute();
             ResponseBody responseBody = response.body();

@@ -1,14 +1,8 @@
 package org.lt.project.dto;
 
-public class LogListenerPatternRequestDto {
-    private String pattern;
-    private String explanation;
+import lombok.Builder;
 
-    public String getPattern() {
-        return pattern;
-    }
-
-    public String getExplanation() {
-        return explanation;
-    }
+@Builder
+public record LogListenerPatternRequestDto(String pattern,
+                                           String explanation) {
 }

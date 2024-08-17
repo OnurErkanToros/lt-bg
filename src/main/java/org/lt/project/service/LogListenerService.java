@@ -2,15 +2,15 @@ package org.lt.project.service;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
-import org.lt.project.core.result.ErrorResult;
-import org.lt.project.core.result.Result;
-import org.lt.project.core.result.SuccessResult;
-import org.lt.project.dto.SuspectIpDto;
-import org.lt.project.entity.SuspectIPEntity;
+import org.lt.project.dto.SuspectIpRequestDto;
+import org.lt.project.dto.resultDto.ErrorResult;
+import org.lt.project.dto.resultDto.Result;
+import org.lt.project.dto.resultDto.SuccessResult;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,7 +76,15 @@ public class LogListenerService extends LogListenerAdapter {
                 String ip = matcher.group(1);
                 String host = matcher.group(2);
                 Integer accessForbiddenNumber = getAccessForbiddenNumber(line);
-                suspectIpService.saveSuspectIp(new SuspectIpDto(ip, host,line, accessForbiddenNumber));
+                suspectIpService.saveSuspectIp(SuspectIpRequestDto.builder()
+                        .ip(ip)
+                        .host(host)
+                        .accessForbiddenNumber(accessForbiddenNumber)
+                        .pattern(pattern.pattern())
+                        .createdAt(new Date())
+                        .isBanned(false)
+                        .line(line)
+                        .build());
             }
     }
 

@@ -1,13 +1,7 @@
 package org.lt.project.dto;
 
-public class AllSuspectIpRequestDto {
-    private String ipAddress;
+import lombok.Builder;
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
+@Builder
+public record AllSuspectIpRequestDto(String ipAddress) {
 }

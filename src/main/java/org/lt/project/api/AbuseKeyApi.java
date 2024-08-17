@@ -1,8 +1,8 @@
 package org.lt.project.api;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.lt.project.core.result.Result;
 import org.lt.project.dto.AbuseDbKeyRequestDto;
+import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.AbuseDBKeyService;
 import org.springframework.web.bind.annotation.*;
 

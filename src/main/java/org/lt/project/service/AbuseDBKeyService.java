@@ -1,12 +1,12 @@
 package org.lt.project.service;
 
 import org.lt.project.core.convertor.AbuseDbKeyConverter;
-import org.lt.project.core.result.DataResult;
-import org.lt.project.core.result.ErrorDataResult;
-import org.lt.project.core.result.SuccessDataResult;
 import org.lt.project.dto.AbuseDbKeyRequestDto;
 import org.lt.project.dto.AbuseDbKeyResponseDto;
-import org.lt.project.entity.AbuseDBKeyEntity;
+import org.lt.project.dto.resultDto.DataResult;
+import org.lt.project.dto.resultDto.ErrorDataResult;
+import org.lt.project.dto.resultDto.SuccessDataResult;
+import org.lt.project.model.AbuseDBKey;
 import org.lt.project.repository.AbuseDBKeyRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class AbuseDBKeyService {
 
     public DataResult<AbuseDbKeyResponseDto> addKey(AbuseDbKeyRequestDto abuseDbKeyRequestDto) {
         try{
-            AbuseDBKeyEntity entity = repository.save(AbuseDbKeyConverter.convert(abuseDbKeyRequestDto));
+            AbuseDBKey entity = repository.save(AbuseDbKeyConverter.convert(abuseDbKeyRequestDto));
             return new SuccessDataResult<>(AbuseDbKeyConverter.convert(entity));
 
         }catch (Exception e){
@@ -43,7 +43,7 @@ public class AbuseDBKeyService {
     }
 
     public DataResult<AbuseDbKeyResponseDto> getLastActiveKey() {
-        AbuseDBKeyEntity entity = repository.findByIsActive(true).getLast();
+        AbuseDBKey entity = repository.findByIsActive(true).getLast();
         if(entity!=null){
             return new SuccessDataResult<>(AbuseDbKeyConverter.convert(entity));
         }else {

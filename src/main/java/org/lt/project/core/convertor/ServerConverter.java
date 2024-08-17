@@ -2,41 +2,41 @@ package org.lt.project.core.convertor;
 
 import org.lt.project.dto.ServerRequestDto;
 import org.lt.project.dto.ServerResponseDto;
-import org.lt.project.entity.ServerEntity;
+import org.lt.project.model.Server;
+import org.lt.project.service.UserService;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
 public class ServerConverter {
-    public static ServerEntity convert(ServerRequestDto serverRequestDto, String createdBy) {
-        return new ServerEntity(
-                serverRequestDto.getName(),
-                serverRequestDto.getUrl(),
-                serverRequestDto.getUsername(),
-                serverRequestDto.getPassword(),
-                serverRequestDto.getPort(),
-                serverRequestDto.getRemoteFilePath(),
-                serverRequestDto.getFileName(),
-                new Date(),
-                createdBy,
-                serverRequestDto.isActive()
-                );
+    public static Server convert(ServerRequestDto serverRequestDto) {
+        return  Server.builder()
+                .name(serverRequestDto.name())
+                .url(serverRequestDto.url())
+                .password(serverRequestDto.password())
+                .port(serverRequestDto.port())
+                .createdBy(UserService.getAuthenticatedUser())
+                .createdAt(new Date())
+                .fileName(serverRequestDto.fileName())
+                .isActive(serverRequestDto.isActive())
+                .remoteFilePath(serverRequestDto.remoteFilePath())
+                .build();
     }
 
-    public static ServerResponseDto convert(ServerEntity serverEntity) {
+    public static ServerResponseDto convert(Server server) {
         return new ServerResponseDto(
-                serverEntity.getId(),
-                serverEntity.getName(),
-                serverEntity.getUrl(),
-                serverEntity.getUsername(),
-                serverEntity.getPassword(),
-                serverEntity.getPort(),
-                serverEntity.getRemoteFilePath(),
-                serverEntity.getFileName(),
-                serverEntity.getCreatedBy(),
-                serverEntity.getCreatedAt(),
-                serverEntity.isActive()
+                server.getId(),
+                server.getName(),
+                server.getUrl(),
+                server.getUsername(),
+                server.getPassword(),
+                server.getPort(),
+                server.getRemoteFilePath(),
+                server.getFileName(),
+                server.getCreatedBy(),
+                server.getCreatedAt(),
+                server.isActive()
         );
     }
 }

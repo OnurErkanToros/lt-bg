@@ -1,10 +1,10 @@
 package org.lt.project.api;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.lt.project.core.result.DataResult;
-import org.lt.project.core.result.Result;
 import org.lt.project.dto.LogListenerPatternRequestDto;
 import org.lt.project.dto.LogListenerPatternResponseDto;
+import org.lt.project.dto.resultDto.DataResult;
+import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.LogListenerRegexService;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +26,7 @@ public class LogListenerPatternApi {
     }
     @PostMapping("add")
     public Result addPattern(@RequestBody LogListenerPatternRequestDto logListenerPatternRequestDto){
-        return logListenerRegexService.addPattern(logListenerPatternRequestDto,"onur");
+        return logListenerRegexService.addPattern(logListenerPatternRequestDto);
     }
 
     @DeleteMapping("delete/{id}")
