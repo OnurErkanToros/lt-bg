@@ -24,7 +24,7 @@ public class AbuseDBBlackList {
     private int abuseConfidenceScore;
     private Date createdAt;
     private String createdBy;
-    private boolean isBanned;
+    private boolean banned;
     private Date banDate;
     private String banBy;
 }

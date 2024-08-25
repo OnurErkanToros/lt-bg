@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 .requestMatchers("/lt-api/1.0/log-listener/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-pattern/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/suspect-ip/get-all").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/banned-ip/*").hasRole("USER")
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

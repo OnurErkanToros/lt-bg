@@ -1,9 +1,12 @@
 package org.lt.project.service;
 
+import lombok.RequiredArgsConstructor;
 import org.lt.project.dto.AbuseBlackListResponseDto;
 import org.lt.project.dto.resultDto.*;
 import org.lt.project.model.AbuseDBBlackList;
 import org.lt.project.model.AbuseDBCheckLog;
+import org.lt.project.model.BannedIp;
+import org.lt.project.model.BannedIpType;
 import org.lt.project.repository.AbuseDBBlackListRepository;
 import org.lt.project.repository.AbuseDBCheckLogRepository;
 import org.springframework.data.domain.Page;
@@ -12,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -19,14 +23,12 @@ import java.util.stream.Collectors;
 
 
 @Service
+@RequiredArgsConstructor
 public class AbuseDBService {
     private final AbuseDBCheckLogRepository checkLogRepository;
     private final AbuseDBBlackListRepository blackListRepository;
+    private final BannedIpService bannedIpService;
 
-    public AbuseDBService(AbuseDBCheckLogRepository checkLogRepository, AbuseDBBlackListRepository blackListRepository ) {
-        this.checkLogRepository = checkLogRepository;
-        this.blackListRepository=blackListRepository;
-    }
 
     public AbuseDBCheckLog addAbuseLog(@NonNull AbuseDBCheckLog abuseLog) {
         return checkLogRepository.save(abuseLog);
@@ -34,9 +36,9 @@ public class AbuseDBService {
 
     public DataResult<AbuseDBCheckLog> getAbuseCheckLogById(long id) {
         Optional<AbuseDBCheckLog> abuseDbOptional = checkLogRepository.findById(id);
-        if(abuseDbOptional.isPresent()){
+        if (abuseDbOptional.isPresent()) {
             return new SuccessDataResult<>(abuseDbOptional.get());
-        }else{
+        } else {
             return new ErrorDataResult<>("Böyle bir kayıt yok");
         }
     }
@@ -51,7 +53,7 @@ public class AbuseDBService {
 
     public Result refreshBlackList(List<AbuseBlackListResponseDto> currentBlacklist) {
         List<AbuseDBBlackList> abuseDBBlackListEntityList = currentBlacklist
-                    .stream()
+                .stream()
                 .map(abuseBlackListResponseDto -> AbuseDBBlackList.builder()
                         .ipAddress(abuseBlackListResponseDto.ipAddress())
                         .countryCode(abuseBlackListResponseDto.countryCode())
@@ -59,23 +61,23 @@ public class AbuseDBService {
                         .abuseConfidenceScore(abuseBlackListResponseDto.abuseConfidenceScore())
                         .createdAt(new Date())
                         .createdBy(UserService.getAuthenticatedUser())
-                        .isBanned(false)
+                        .banned(false)
                         .build())
-                    .collect(Collectors.toList());
+                .collect(Collectors.toList());
         List<AbuseDBBlackList> savedBlackList = blackListRepository.saveAll(abuseDBBlackListEntityList);
         if (savedBlackList.isEmpty()) {
-                return new ErrorResult("Liste kaydedilemedi.");
-            }else{
-                return new SuccessResult("Liste eklendi");
-            }
+            return new ErrorResult("Liste kaydedilemedi.");
+        } else {
+            return new SuccessResult("Liste eklendi");
+        }
     }
 
     public DataResult<Page<AbuseDBBlackList>> getAllBlackList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<AbuseDBBlackList> allBlackList = blackListRepository.findAll(pageable);
-        if(allBlackList.isEmpty()){
+        if (allBlackList.isEmpty()) {
             return new ErrorDataResult<>("hiç kayıt yok");
-        }else {
+        } else {
             return new SuccessDataResult<>(allBlackList);
         }
     }
@@ -83,5 +85,45 @@ public class AbuseDBService {
     public void deleteSuspectIp(long id) {
         Optional<AbuseDBBlackList> blackListEntityOptional = blackListRepository.findById(id);
         blackListEntityOptional.ifPresent(blackListRepository::delete);
+    }
+
+    public Result setBanForBlacklist(List<String> ipList) {
+        List<AbuseDBBlackList> existingBlackList = blackListRepository.findAllByBannedFalseAndIpAddressIn(ipList);
+        if (existingBlackList.isEmpty()) {
+            return new ErrorResult("Banlanacak ip bulunamadı.");
+        } else {
+            List<BannedIp> bannedIpList = new ArrayList<>();
+            for (AbuseDBBlackList dbBlackList : existingBlackList) {
+                dbBlackList.setBanned(true);
+                bannedIpList.add(BannedIp.builder()
+                        .ip(dbBlackList.getIpAddress())
+                        .ipType(BannedIpType.BLACKLIST)
+                        .transferred(false)
+                        .build());
+            }
+            bannedIpService.addAllIp(bannedIpList);
+            blackListRepository.saveAll(existingBlackList);
+            return new SuccessResult();
+        }
+    }
+
+    public Result setBanForCheckIp(String ip) {
+        List<AbuseDBCheckLog> existingCheckLogList =
+                checkLogRepository.findAllByIpAddressAndBannedFalse(ip);
+        if (existingCheckLogList.isEmpty()) {
+            return new ErrorResult("Banlanacak bişey yok");
+        } else {
+            existingCheckLogList.forEach(abuseDBCheckLog -> {
+                abuseDBCheckLog.setBanned(true);
+            });
+            checkLogRepository.saveAll(existingCheckLogList);
+            bannedIpService.addBannedIp(
+                    BannedIp.builder()
+                            .ip(ip)
+                            .ipType(BannedIpType.CHECK)
+                            .transferred(false)
+                            .build());
+            return new SuccessResult();
+        }
     }
 }

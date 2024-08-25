@@ -30,4 +30,9 @@ public class SuspectIpController {
     public Result addSuspectIp(@RequestBody SuspectIpRequestDto suspectIpRequestDto) {
         return suspectIpService.save(suspectIpRequestDto);
     }
+
+    @PostMapping("ban")
+    public Result setBanSuspectIpList(@RequestBody List<String> ipList){
+        return suspectIpService.setBanSuspectIpList(ipList);
+    }
 }

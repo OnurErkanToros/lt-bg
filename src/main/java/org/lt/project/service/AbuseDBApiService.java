@@ -49,8 +49,12 @@ public class AbuseDBApiService {
                     .build();
             try (Response response = okHttpClient.newCall(request).execute();
                  ResponseBody responseBody = response.body()) {
-                JsonNode jsonNode = objectMapper.readTree(responseBody.string()).get("data");
-                AbuseCheckResponseDto responseDto = objectMapper.readValue(jsonNode.toString(), AbuseCheckResponseDto.class);
+                JsonNode jsonNode = objectMapper.readTree(responseBody.string());
+                if(jsonNode.has("errors")){
+                    return new ErrorDataResult<>(jsonNode.get("errors").asText());
+                }
+                JsonNode jsonNodeData = jsonNode.get("data");
+                AbuseCheckResponseDto responseDto = objectMapper.readValue(jsonNodeData.toString(), AbuseCheckResponseDto.class);
                 if (responseDto != null) {
                     String username = UserService.getAuthenticatedUser();
                     abuseDBService.addAbuseLog(
@@ -65,7 +69,7 @@ public class AbuseDBApiService {
                                     .countryName(responseDto.countryName())
                                     .domain(responseDto.domain())
                                     .isTor(responseDto.isTor())
-                                    .isBanned(false)
+                                    .banned(false)
                                     .isPublic(responseDto.isPublic())
                                     .isWhiteListed(responseDto.isWhitelisted())
                                     .checkBy(username)

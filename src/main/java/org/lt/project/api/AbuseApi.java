@@ -45,4 +45,12 @@ public class AbuseApi {
     public Result getAllBlackList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
         return this.abuseDBService.getAllBlackList(page, size);
     }
+    @PostMapping("blacklist/ban")
+    public Result setBanForBlacklist(@RequestBody List<String> ipList){
+        return abuseDBService.setBanForBlacklist(ipList);
+    }
+    @PostMapping("check-ip/ban")
+    public Result setBanForCheckIp(@RequestBody String ip){
+        return abuseDBService.setBanForCheckIp(ip);
+    }
 }

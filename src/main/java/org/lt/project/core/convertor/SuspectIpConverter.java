@@ -15,7 +15,7 @@ public class SuspectIpConverter {
                 .host(suspectIpRequestDto.host())
                 .createdAt(suspectIpRequestDto.createdAt())
                 .createdBy(UserService.getAuthenticatedUser())
-                .isBanned(suspectIpRequestDto.isBanned())
+                .banned(suspectIpRequestDto.isBanned())
                 .build();
     }
 

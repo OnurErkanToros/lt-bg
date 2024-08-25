@@ -47,7 +47,7 @@ public class AbuseDBCheckLog {
     @Column(name = "check_date")
     private Date checkDate;
     private String checkBy;
-    private boolean isBanned;
+    private boolean banned;
     private Date banDate;
     private String banBy;
 }

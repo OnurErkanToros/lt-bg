@@ -15,4 +15,5 @@ public interface SuspectIpRepository extends JpaRepository<SuspectIP, Long> {
     List<SuspectIP> findByIpAddress(String ipAddress);
     @NotNull
     Page<SuspectIP> findAll(@NotNull Pageable pageable);
+    List<SuspectIP> findAllByBannedFalseAndIpAddressIn(List<String> ipAddressList);
 }
