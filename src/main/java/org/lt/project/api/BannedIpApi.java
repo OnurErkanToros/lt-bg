@@ -1,15 +1,15 @@
 package org.lt.project.api;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.BannedIpService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/lt-api/1.0/banned-ip/")
+@SecurityRequirement(name = "Authorization")
 @RequiredArgsConstructor
 public class BannedIpApi {
     private final BannedIpService bannedIpService;

@@ -95,6 +95,8 @@ public class AbuseDBService {
             List<BannedIp> bannedIpList = new ArrayList<>();
             for (AbuseDBBlackList dbBlackList : existingBlackList) {
                 dbBlackList.setBanned(true);
+                dbBlackList.setBanBy(UserService.getAuthenticatedUser());
+                dbBlackList.setBanDate(new Date());
                 bannedIpList.add(BannedIp.builder()
                         .ip(dbBlackList.getIpAddress())
                         .ipType(BannedIpType.BLACKLIST)
@@ -106,7 +108,7 @@ public class AbuseDBService {
             return new SuccessResult();
         }
     }
-
+    //ip_address "" içinde gönderilince kabul etmiyor düz 192.145.12.31 şeklinde yazılmalı
     public Result setBanForCheckIp(String ip) {
         List<AbuseDBCheckLog> existingCheckLogList =
                 checkLogRepository.findAllByIpAddressAndBannedFalse(ip);
@@ -115,6 +117,8 @@ public class AbuseDBService {
         } else {
             existingCheckLogList.forEach(abuseDBCheckLog -> {
                 abuseDBCheckLog.setBanned(true);
+                abuseDBCheckLog.setBanBy(UserService.getAuthenticatedUser());
+                abuseDBCheckLog.setBanDate(new Date());
             });
             checkLogRepository.saveAll(existingCheckLogList);
             bannedIpService.addBannedIp(
