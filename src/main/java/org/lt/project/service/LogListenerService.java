@@ -2,10 +2,9 @@ package org.lt.project.service;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
+import org.lt.project.dto.LogListenerStatusResponseDto;
 import org.lt.project.dto.SuspectIpRequestDto;
-import org.lt.project.dto.resultDto.ErrorResult;
-import org.lt.project.dto.resultDto.Result;
-import org.lt.project.dto.resultDto.SuccessResult;
+import org.lt.project.dto.resultDto.*;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -30,6 +29,14 @@ public class LogListenerService extends LogListenerAdapter {
         this.suspectIpService=suspectIpService;
         String patternString = ".*access forbidden by rule.*client: ([^,]+).*host: ([^,]+).*";
         pattern = Pattern.compile(patternString, Pattern.MULTILINE);
+    }
+
+    public DataResult<LogListenerStatusResponseDto> getStatus() {
+        return new SuccessDataResult<>(
+                LogListenerStatusResponseDto.builder()
+                .status(isServiceRunning ? LogListenerStatusResponseDto.LogListenerStatus.STARTED :
+                        LogListenerStatusResponseDto.LogListenerStatus.STOPPED)
+                .build());
     }
 
     public Result startService(){
@@ -59,6 +66,7 @@ public class LogListenerService extends LogListenerAdapter {
         try{
             if(isServiceRunning){
                 tailer.close();
+                isServiceRunning=false;
                 return new SuccessResult("Başarıyla durduruldu.");
             }else {
                 return new ErrorResult("Zaten başlatılmadı.");
@@ -76,7 +84,7 @@ public class LogListenerService extends LogListenerAdapter {
                 String ip = matcher.group(1);
                 String host = matcher.group(2);
                 Integer accessForbiddenNumber = getAccessForbiddenNumber(line);
-                suspectIpService.saveSuspectIp(SuspectIpRequestDto.builder()
+                suspectIpService.save(SuspectIpRequestDto.builder()
                         .ip(ip)
                         .host(host)
                         .accessForbiddenNumber(accessForbiddenNumber)

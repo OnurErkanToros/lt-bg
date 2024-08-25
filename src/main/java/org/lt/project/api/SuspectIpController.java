@@ -6,9 +6,8 @@ import org.lt.project.dto.SuspectIpResponseDto;
 import org.lt.project.dto.resultDto.DataResult;
 import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.SuspectIpService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,18 +15,19 @@ import java.util.List;
 @RequestMapping("/lt-api/1.0/suspect-ip/")
 @SecurityRequirement(name = "Authorization")
 public class SuspectIpController {
-    private SuspectIpService suspectIpService;
+    private final SuspectIpService suspectIpService;
 
     public SuspectIpController(SuspectIpService suspectIpService) {
         this.suspectIpService = suspectIpService;
     }
 
-    public DataResult<List<SuspectIpResponseDto>> getSuspectIpList() {
-        return suspectIpService.getAllSuspectIpList();
+    @GetMapping("get-all")
+    public DataResult<Page<SuspectIpResponseDto>> getSuspectIpList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
+        return suspectIpService.getAll(page,size);
     }
 
-    @GetMapping("add-suspect")
-    public Result addSuspectIp(SuspectIpRequestDto suspectIpRequestDto) {
-        return suspectIpService.saveSuspectIp(suspectIpRequestDto);
+    @PostMapping("add")
+    public Result addSuspectIp(@RequestBody SuspectIpRequestDto suspectIpRequestDto) {
+        return suspectIpService.save(suspectIpRequestDto);
     }
 }

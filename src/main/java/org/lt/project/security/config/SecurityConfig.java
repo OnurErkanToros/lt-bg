@@ -1,9 +1,11 @@
 package org.lt.project.security.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.lt.project.security.filter.TokenAuthenticationFilter;
 import org.lt.project.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,6 +18,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +44,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(x ->
                         x.requestMatchers("/lt-api/1.0/authentication/create").permitAll()
                                 .requestMatchers("/lt-api/1.0/authentication/login").permitAll()
@@ -53,7 +62,7 @@ public class SecurityConfig {
                                 .requestMatchers("/lt-api/1.0/abuse/blacklist/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-listener/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-pattern/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/suspect-ip/*").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/suspect-ip/get-all").hasRole("USER")
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
@@ -73,5 +82,16 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
 
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

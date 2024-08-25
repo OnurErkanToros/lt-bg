@@ -3,6 +3,7 @@ package org.lt.project.core.convertor;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
 import org.lt.project.model.SuspectIP;
+import org.lt.project.service.UserService;
 
 public class SuspectIpConverter {
     public static SuspectIP convert(SuspectIpRequestDto suspectIpRequestDto) {
@@ -13,6 +14,7 @@ public class SuspectIpConverter {
                 .line(suspectIpRequestDto.line())
                 .host(suspectIpRequestDto.host())
                 .createdAt(suspectIpRequestDto.createdAt())
+                .createdBy(UserService.getAuthenticatedUser())
                 .isBanned(suspectIpRequestDto.isBanned())
                 .build();
     }

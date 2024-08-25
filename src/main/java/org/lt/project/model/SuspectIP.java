@@ -26,6 +26,7 @@ public class SuspectIP {
     @Column
     private String line;
     private Date createdAt;
+    private String createdBy;
     private boolean isBanned;
     private Date banDate;
     private String banBy;
