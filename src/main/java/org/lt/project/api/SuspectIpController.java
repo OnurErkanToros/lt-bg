@@ -1,6 +1,7 @@
 package org.lt.project.api;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
 import org.lt.project.dto.resultDto.DataResult;
@@ -32,7 +33,7 @@ public class SuspectIpController {
     }
 
     @PostMapping("ban")
-    public Result setBanSuspectIpList(@RequestBody List<String> ipList){
-        return suspectIpService.setBanSuspectIpList(ipList);
+    public Result setBanSuspectIpList(@RequestBody List<BanRequestDto> banRequestDtoList){
+        return suspectIpService.setBanSuspectIpList(banRequestDtoList);
     }
 }

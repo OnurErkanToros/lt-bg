@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "banned_ip")
 @Data
@@ -20,4 +22,8 @@ public class BannedIp {
     @Enumerated(EnumType.STRING)
     private BannedIpType ipType;
     private boolean transferred = false;
+    private Date transferredAt;
+    private String transferredBy;
+    private Date createdAt;
+    private String createdBy;
 }

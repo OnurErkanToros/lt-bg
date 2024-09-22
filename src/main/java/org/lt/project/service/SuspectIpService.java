@@ -2,6 +2,7 @@ package org.lt.project.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lt.project.core.convertor.SuspectIpConverter;
+import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
 import org.lt.project.dto.resultDto.*;
@@ -13,9 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -45,8 +46,9 @@ public class SuspectIpService {
         }
     }
 
-    public Result setBanSuspectIpList(List<String> ipList){
-        List<SuspectIP> suspectIPList = repository.findAllByBannedFalseAndIpAddressIn(ipList);
+    public Result setBanSuspectIpList(List<BanRequestDto> banRequestDtoList){
+        List<String> banList = banRequestDtoList.stream().map(BanRequestDto::ip).toList();
+        List<SuspectIP> suspectIPList = repository.findAllByBannedFalseAndIpAddressIn(banList);
         if(suspectIPList.isEmpty()){
             return new ErrorResult("Banlanacak bişey yok.");
         }
@@ -58,6 +60,8 @@ public class SuspectIpService {
                             .ip(suspectIP.getIpAddress())
                             .transferred(false)
                             .ipType(BannedIpType.LISTENER)
+                            .createdAt(new Date())
+                            .createdBy(UserService.getAuthenticatedUser())
                             .build());
         }
         repository.saveAll(suspectIPList);

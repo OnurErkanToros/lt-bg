@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import org.lt.project.dto.AbuseBlackListResponseDto;
+import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.resultDto.DataResult;
 import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.AbuseDBApiService;
@@ -46,11 +47,11 @@ public class AbuseApi {
         return this.abuseDBService.getAllBlackList(page, size);
     }
     @PostMapping("blacklist/ban")
-    public Result setBanForBlacklist(@RequestBody List<String> ipList){
-        return abuseDBService.setBanForBlacklist(ipList);
+    public Result setBanForBlacklist(@RequestBody List<BanRequestDto> banRequestDtoList) {
+        return abuseDBService.setBanForBlacklist(banRequestDtoList);
     }
     @PostMapping("check-ip/ban")
-    public Result setBanForCheckIp(@RequestBody String ip){
-        return abuseDBService.setBanForCheckIp(ip);
+    public Result setBanForCheckIp(@RequestBody BanRequestDto banRequestDto){
+        return abuseDBService.setBanForCheckIp(banRequestDto);
     }
 }

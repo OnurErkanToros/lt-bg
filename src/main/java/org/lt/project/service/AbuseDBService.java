@@ -1,7 +1,9 @@
 package org.lt.project.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lt.project.dto.AbuseBlackListResponseDto;
+import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.resultDto.*;
 import org.lt.project.model.AbuseDBBlackList;
 import org.lt.project.model.AbuseDBCheckLog;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AbuseDBService {
@@ -87,8 +90,9 @@ public class AbuseDBService {
         blackListEntityOptional.ifPresent(blackListRepository::delete);
     }
 
-    public Result setBanForBlacklist(List<String> ipList) {
-        List<AbuseDBBlackList> existingBlackList = blackListRepository.findAllByBannedFalseAndIpAddressIn(ipList);
+    public Result setBanForBlacklist(List<BanRequestDto> banRequestDtoList) {
+        List<String> banIpList = banRequestDtoList.stream().map(BanRequestDto::ip).toList();
+        List<AbuseDBBlackList> existingBlackList = blackListRepository.findAllByBannedFalseAndIpAddressIn(banIpList);
         if (existingBlackList.isEmpty()) {
             return new ErrorResult("Banlanacak ip bulunamadı.");
         } else {
@@ -101,6 +105,8 @@ public class AbuseDBService {
                         .ip(dbBlackList.getIpAddress())
                         .ipType(BannedIpType.BLACKLIST)
                         .transferred(false)
+                        .createdAt(new Date())
+                        .createdBy(UserService.getAuthenticatedUser())
                         .build());
             }
             bannedIpService.addAllIp(bannedIpList);
@@ -109,9 +115,9 @@ public class AbuseDBService {
         }
     }
     //ip_address "" içinde gönderilince kabul etmiyor düz 192.145.12.31 şeklinde yazılmalı
-    public Result setBanForCheckIp(String ip) {
+    public Result setBanForCheckIp(BanRequestDto banRequestDto) {
         List<AbuseDBCheckLog> existingCheckLogList =
-                checkLogRepository.findAllByIpAddressAndBannedFalse(ip);
+                checkLogRepository.findAllByIpAddressAndBannedFalse(banRequestDto.ip());
         if (existingCheckLogList.isEmpty()) {
             return new ErrorResult("Banlanacak bişey yok");
         } else {
@@ -123,9 +129,11 @@ public class AbuseDBService {
             checkLogRepository.saveAll(existingCheckLogList);
             bannedIpService.addBannedIp(
                     BannedIp.builder()
-                            .ip(ip)
+                            .ip(banRequestDto.ip())
                             .ipType(BannedIpType.CHECK)
                             .transferred(false)
+                            .createdAt(new Date())
+                            .createdBy(UserService.getAuthenticatedUser())
                             .build());
             return new SuccessResult();
         }
