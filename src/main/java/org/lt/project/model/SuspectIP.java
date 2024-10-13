@@ -27,8 +27,9 @@ public class SuspectIP {
     private String line;
     private Date createdAt;
     private String createdBy;
-    private boolean banned;
-    private Date banDate;
-    private String banBy;
     private String pattern;
+    @Enumerated(EnumType.STRING)
+    private IpStatus status;
+    private Date statusAt;
+    private String statusBy;
 }

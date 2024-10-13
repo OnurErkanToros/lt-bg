@@ -1,4 +1,4 @@
-package org.lt.project.core.convertor;
+package org.lt.project.util.convertor;
 
 import org.lt.project.dto.ServerRequestDto;
 import org.lt.project.dto.ServerResponseDto;

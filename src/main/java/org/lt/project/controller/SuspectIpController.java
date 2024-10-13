@@ -1,13 +1,13 @@
-package org.lt.project.api;
+package org.lt.project.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
-import org.lt.project.dto.resultDto.DataResult;
-import org.lt.project.dto.resultDto.Result;
+import org.lt.project.model.SuspectIP;
 import org.lt.project.service.SuspectIpService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,17 +23,17 @@ public class SuspectIpController {
     }
 
     @GetMapping("get-all")
-    public DataResult<Page<SuspectIpResponseDto>> getSuspectIpList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
-        return suspectIpService.getAll(page,size);
+    public ResponseEntity<Page<SuspectIpResponseDto>> getSuspectIpList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
+        return ResponseEntity.ok(suspectIpService.getAll(page, size));
     }
 
     @PostMapping("add")
-    public Result addSuspectIp(@RequestBody SuspectIpRequestDto suspectIpRequestDto) {
-        return suspectIpService.save(suspectIpRequestDto);
+    public ResponseEntity<SuspectIP> addSuspectIp(@RequestBody SuspectIpRequestDto suspectIpRequestDto) {
+        return ResponseEntity.ok(suspectIpService.save(suspectIpRequestDto));
     }
 
     @PostMapping("ban")
-    public Result setBanSuspectIpList(@RequestBody List<BanRequestDto> banRequestDtoList){
-        return suspectIpService.setBanSuspectIpList(banRequestDtoList);
+    public ResponseEntity<Boolean> setBanSuspectIpList(@RequestBody List<BanRequestDto> banRequestDtoList) {
+        return ResponseEntity.ok(suspectIpService.setBanSuspectIpList(banRequestDtoList));
     }
 }

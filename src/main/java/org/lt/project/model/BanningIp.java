@@ -14,16 +14,30 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BannedIp {
+public class BanningIp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String ip;
     @Enumerated(EnumType.STRING)
-    private BannedIpType ipType;
-    private boolean transferred = false;
+    private BanningIpType ipType;
+    @Enumerated(EnumType.STRING)
+    private BanningIpStatus status;
     private Date transferredAt;
     private String transferredBy;
     private Date createdAt;
     private String createdBy;
+
+    public enum BanningIpStatus {
+        TRANSFERRED,
+        NOT_TRANSFERRED,
+        ERROR,
+    }
+
+    public enum BanningIpType {
+        BLACKLIST,
+        CHECK,
+        LISTENER,
+        MANUEL
+    }
 }

@@ -1,4 +1,4 @@
-package org.lt.project.core.convertor;
+package org.lt.project.util.convertor;
 
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
@@ -15,7 +15,6 @@ public class SuspectIpConverter {
                 .host(suspectIpRequestDto.host())
                 .createdAt(suspectIpRequestDto.createdAt())
                 .createdBy(UserService.getAuthenticatedUser())
-                .banned(suspectIpRequestDto.isBanned())
                 .build();
     }
 
@@ -27,9 +26,9 @@ public class SuspectIpConverter {
                 .line(suspectIP.getLine())
                 .host(suspectIP.getHost())
                 .createdAt(suspectIP.getCreatedAt())
-                .isBanned(suspectIP.isBanned())
-                .banDate(suspectIP.getBanDate())
-                .banBy(suspectIP.getBanBy())
+                .status(suspectIP.getStatus())
+                .statusBy(suspectIP.getStatusBy())
+                .statusAt(suspectIP.getStatusAt())
                 .build();
     }
 }

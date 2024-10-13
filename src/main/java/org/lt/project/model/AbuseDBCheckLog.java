@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-import org.hibernate.type.NumericBooleanConverter;
 
 import java.util.Date;
 
@@ -49,7 +47,8 @@ public class AbuseDBCheckLog {
     @Column(name = "check_date")
     private Date checkDate;
     private String checkBy;
-    private boolean banned;
-    private Date banDate;
-    private String banBy;
+    @Enumerated(EnumType.STRING)
+    private IpStatus status;
+    private Date statusAt;
+    private String statusBy;
 }

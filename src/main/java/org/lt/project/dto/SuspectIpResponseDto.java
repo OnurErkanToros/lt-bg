@@ -1,6 +1,7 @@
 package org.lt.project.dto;
 
 import lombok.Builder;
+import org.lt.project.model.IpStatus;
 
 import java.util.Date;
 
@@ -10,10 +11,10 @@ public record SuspectIpResponseDto(
         String host,
         String line,
         int accessForbiddenNumber,
-        boolean isBanned,
         String pattern,
         Date createdAt,
-        Date banDate,
-        String banBy
+        IpStatus status,
+        Date statusAt,
+        String statusBy
 ) {
 }

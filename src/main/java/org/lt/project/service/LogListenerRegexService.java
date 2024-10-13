@@ -1,11 +1,11 @@
 package org.lt.project.service;
 
-import org.lt.project.core.convertor.LogListenerPatternConverter;
 import org.lt.project.dto.LogListenerPatternRequestDto;
 import org.lt.project.dto.LogListenerPatternResponseDto;
-import org.lt.project.dto.resultDto.*;
+import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.LogListenerPattern;
 import org.lt.project.repository.LogListenerRegexRepository;
+import org.lt.project.util.convertor.LogListenerPatternConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,41 +19,38 @@ public class LogListenerRegexService {
         this.logListenerRegexRepository = logListenerRegexRepository;
     }
 
-    public DataResult<List<LogListenerPatternResponseDto>> getAllPattern() {
+    public List<LogListenerPatternResponseDto> getAllPattern() {
         List<LogListenerPattern> allPatternEntity = logListenerRegexRepository.findAll();
         List<LogListenerPatternResponseDto> allPattern = allPatternEntity.stream().map(LogListenerPatternConverter::convert).toList();
-        if (allPattern.isEmpty()){
-            return new ErrorDataResult<>("liste boş");
-        }else {
-            return new SuccessDataResult<>(allPattern);
+        if (allPattern.isEmpty()) {
+            throw new ResourceNotFoundException("Pattern listesi boş.");
         }
+        return allPattern;
     }
 
-    public Result addPattern(LogListenerPatternRequestDto logListenerPatternRequestDto) {
-        LogListenerPattern savedLogListenerPattern = logListenerRegexRepository.save(LogListenerPatternConverter.convert(logListenerPatternRequestDto));
-        if (savedLogListenerPattern != null) {
-            return new SuccessResult();
-        }else{
-            return new ErrorResult("ekleme başarısız");
-        }
+    public LogListenerPatternResponseDto addPattern(LogListenerPatternRequestDto logListenerPatternRequestDto) {
+        return LogListenerPatternConverter.convert(
+                logListenerRegexRepository.save(
+                        LogListenerPatternConverter.convert(logListenerPatternRequestDto)));
+
     }
-    public Result deletePattern(int patternId){
+
+    public boolean deletePattern(int patternId) {
         Optional<LogListenerPattern> currentPattern = logListenerRegexRepository.findById(patternId);
-        if(currentPattern.isPresent()){
-            logListenerRegexRepository.delete(currentPattern.get());
-            return new SuccessResult("Başarıyla silindi.");
-        }else {
-            return new ErrorResult("Böyle bir kayıt yok");
+        if (currentPattern.isEmpty()) {
+            throw new ResourceNotFoundException("Silinmek istenen pattern bulunamadı.");
         }
+        logListenerRegexRepository.delete(currentPattern.get());
+        return true;
     }
-    public DataResult<LogListenerPatternResponseDto> updatePattern(LogListenerPatternRequestDto listenerPatternRequestDto,int id){
+
+    public LogListenerPatternResponseDto updatePattern(LogListenerPatternRequestDto listenerPatternRequestDto, int id) {
         Optional<LogListenerPattern> currentPatternEntity = logListenerRegexRepository.findById(id);
-        if(currentPatternEntity.isPresent()){
-            currentPatternEntity.get().setPattern(listenerPatternRequestDto.pattern());
-            currentPatternEntity.get().setExplanation(listenerPatternRequestDto.explanation());
-            return new SuccessDataResult<>(LogListenerPatternConverter.convert(logListenerRegexRepository.save(currentPatternEntity.get())));
-        }else{
-            return new ErrorDataResult<>("Güncelleme başarısız.");
+        if (currentPatternEntity.isEmpty()) {
+            throw new ResourceNotFoundException("Güncellenmek istenen pattern bulunamadı.");
         }
+        currentPatternEntity.get().setPattern(listenerPatternRequestDto.pattern());
+        currentPatternEntity.get().setExplanation(listenerPatternRequestDto.explanation());
+        return LogListenerPatternConverter.convert(logListenerRegexRepository.save(currentPatternEntity.get()));
     }
 }

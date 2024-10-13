@@ -1,15 +1,15 @@
 package org.lt.project.service;
 
 import lombok.RequiredArgsConstructor;
-import org.lt.project.core.convertor.SuspectIpConverter;
 import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
-import org.lt.project.dto.resultDto.*;
-import org.lt.project.model.BannedIp;
-import org.lt.project.model.BannedIpType;
+import org.lt.project.exception.customExceptions.ResourceNotFoundException;
+import org.lt.project.model.BanningIp;
+import org.lt.project.model.IpStatus;
 import org.lt.project.model.SuspectIP;
 import org.lt.project.repository.SuspectIpRepository;
+import org.lt.project.util.convertor.SuspectIpConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,49 +23,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SuspectIpService {
     private final SuspectIpRepository repository;
-    private final BannedIpService bannedIpService;
+    private final BanningIpService banningIpService;
 
 
-    public DataResult<Page<SuspectIpResponseDto>> getAll(int page, int size) {
+    public Page<SuspectIpResponseDto> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<SuspectIpResponseDto> suspectIpResponseDtos =  repository.findAll(pageable).map(SuspectIpConverter::convert);
-        if (!suspectIpResponseDtos.isEmpty()) {
-            return new SuccessDataResult<>  (suspectIpResponseDtos);
-        }else {
-            return new ErrorDataResult<>("Şüpheli ip yok");
+        if (suspectIpResponseDtos.isEmpty()) {
+            throw new ResourceNotFoundException("Liste boş.");
         }
+        return suspectIpResponseDtos;
     }
 
-    public Result save(SuspectIpRequestDto suspectIpRequestDto) {
+    public SuspectIP save(SuspectIpRequestDto suspectIpRequestDto) {
         SuspectIP suspectIP = SuspectIpConverter.convert(suspectIpRequestDto);
-        SuspectIP savedSuspectIP = repository.save(suspectIP);
-        if (savedSuspectIP != null) {
-            return new SuccessResult();
-        }else {
-            return new ErrorResult();
-        }
+        suspectIP.setStatus(IpStatus.NEW);
+        suspectIP.setStatusAt(new Date());
+        suspectIP.setStatusBy(UserService.getAuthenticatedUser());
+        return repository.save(suspectIP);
     }
 
-    public Result setBanSuspectIpList(List<BanRequestDto> banRequestDtoList){
+    public Boolean setBanSuspectIpList(List<BanRequestDto> banRequestDtoList) {
         List<String> banList = banRequestDtoList.stream().map(BanRequestDto::ip).toList();
-        List<SuspectIP> suspectIPList = repository.findAllByBannedFalseAndIpAddressIn(banList);
+        List<SuspectIP> suspectIPList = repository.findAllByStatusAndIpAddressIn(IpStatus.NEW, banList);
         if(suspectIPList.isEmpty()){
-            return new ErrorResult("Banlanacak bişey yok.");
+            throw new ResourceNotFoundException("Liste boş.");
         }
-        List<BannedIp> bannedIpList = new ArrayList<>();
+        List<BanningIp> banningIpList = new ArrayList<>();
+        String user = UserService.getAuthenticatedUser();
         for (SuspectIP suspectIP : suspectIPList) {
-            suspectIP.setBanned(true);
-            bannedIpList.add(
-                    BannedIp.builder()
+            suspectIP.setStatus(IpStatus.READY_TRANSFER);
+            suspectIP.setStatusAt(new Date());
+            suspectIP.setStatusBy(user);
+            banningIpList.add(
+                    BanningIp.builder()
                             .ip(suspectIP.getIpAddress())
-                            .transferred(false)
-                            .ipType(BannedIpType.LISTENER)
+                            .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
+                            .ipType(BanningIp.BanningIpType.LISTENER)
                             .createdAt(new Date())
-                            .createdBy(UserService.getAuthenticatedUser())
+                            .createdBy(user)
                             .build());
         }
         repository.saveAll(suspectIPList);
-        bannedIpService.addAllIp(bannedIpList);
-        return new SuccessResult();
+        return true;
     }
 }

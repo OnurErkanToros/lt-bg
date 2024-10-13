@@ -1,11 +1,9 @@
 package org.lt.project.security.config;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.lt.project.security.filter.TokenAuthenticationFilter;
 import org.lt.project.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,7 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -63,7 +60,7 @@ public class SecurityConfig {
                                 .requestMatchers("/lt-api/1.0/abuse/check-ip/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-listener/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-pattern/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/suspect-ip/get-all").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/suspect-ip/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/banned-ip/*").hasRole("USER")
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -7,7 +7,9 @@ import lombok.Builder;
 @Builder
 public record LogListenerStatusResponseDto(
         @Enumerated(EnumType.STRING)
-        LogListenerStatus status
+        LogListenerStatus status,
+        String startTime,
+        String endTime
 ) {
     public enum LogListenerStatus{
         STOPPED,

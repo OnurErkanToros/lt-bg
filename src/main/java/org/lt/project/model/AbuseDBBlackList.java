@@ -24,7 +24,8 @@ public class AbuseDBBlackList {
     private int abuseConfidenceScore;
     private Date createdAt;
     private String createdBy;
-    private boolean banned;
-    private Date banDate;
-    private String banBy;
+    @Enumerated(EnumType.STRING)
+    private IpStatus status;
+    private Date statusAt;
+    private String statusBy;
 }

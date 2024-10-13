@@ -4,11 +4,13 @@ import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.lt.project.dto.LogListenerStatusResponseDto;
 import org.lt.project.dto.SuspectIpRequestDto;
-import org.lt.project.dto.resultDto.*;
+import org.lt.project.exception.customExceptions.BadRequestException;
+import org.lt.project.exception.customExceptions.InternalServerErrorException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
@@ -23,6 +25,8 @@ public class LogListenerService extends LogListenerAdapter {
     private final Pattern pattern;
     private Tailer tailer;
     private boolean isServiceRunning = false;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
 
     public LogListenerService(SuspectIpService suspectIpService) {
@@ -31,18 +35,27 @@ public class LogListenerService extends LogListenerAdapter {
         pattern = Pattern.compile(patternString, Pattern.MULTILINE);
     }
 
-    public DataResult<LogListenerStatusResponseDto> getStatus() {
-        return new SuccessDataResult<>(
-                LogListenerStatusResponseDto.builder()
+    public LogListenerStatusResponseDto getStatus() {
+        var startTimeString = "";
+        var endTimeString = "";
+        if (startTime != null) {
+            startTimeString = startTime.toString();
+        }
+        if (endTime != null) {
+            endTimeString = endTime.toString();
+        }
+        return LogListenerStatusResponseDto.builder()
                 .status(isServiceRunning ? LogListenerStatusResponseDto.LogListenerStatus.STARTED :
                         LogListenerStatusResponseDto.LogListenerStatus.STOPPED)
-                .build());
+                .startTime(startTimeString)
+                .endTime(endTimeString)
+                .build();
     }
 
-    public Result startService(){
+    public boolean startService() {
         try{
             if(isServiceRunning){
-                return new ErrorResult("Servis zaten çalışıyor.");
+                throw new BadRequestException("Servis zaten çalışıyor.");
             }
             String logFilePath="src/main/resources/error.log";
             File logFile = new File(logFilePath);
@@ -56,23 +69,26 @@ public class LogListenerService extends LogListenerAdapter {
             Executor executor = newSingleThreadExecutor();
             executor.execute(tailer);
             isServiceRunning=true;
-            return new SuccessResult("Başarıyla başlatıldı");
+            startTime = LocalDateTime.now();
+            return true;
         }catch (Exception e){
-            return new ErrorResult("Başlatılırken bir hata oluştu. "+e.getMessage());
+            throw new InternalServerErrorException("Başlatılırken bir hata oluştu. " + e.getMessage());
         }
 
     }
-    public Result stopService(){
+
+    public boolean stopService() {
         try{
             if(isServiceRunning){
                 tailer.close();
                 isServiceRunning=false;
-                return new SuccessResult("Başarıyla durduruldu.");
+                endTime = LocalDateTime.now();
+                return true;
             }else {
-                return new ErrorResult("Zaten başlatılmadı.");
+                throw new BadRequestException("Zaten duruyor.");
             }
         }catch (Exception e){
-            return new ErrorResult("Durdurulurken bir hata oluştu. "+e.getMessage());
+            throw new InternalServerErrorException("Durdurulurken bir hata oluştu. " + e.getMessage());
         }
 
     }
@@ -90,7 +106,6 @@ public class LogListenerService extends LogListenerAdapter {
                         .accessForbiddenNumber(accessForbiddenNumber)
                         .pattern(pattern.pattern())
                         .createdAt(new Date())
-                        .isBanned(false)
                         .line(line)
                         .build());
             }

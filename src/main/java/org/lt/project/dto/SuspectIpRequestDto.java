@@ -11,7 +11,6 @@ public record SuspectIpRequestDto(
         String host,
         String line,
         int accessForbiddenNumber,
-        boolean isBanned,
         String pattern,
         Date createdAt
 ) {
