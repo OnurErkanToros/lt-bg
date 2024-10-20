@@ -33,5 +33,5 @@ public class Server {
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "is_active",nullable = false)
-    private boolean isActive=false;
+    private boolean isActive;
 }
