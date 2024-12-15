@@ -10,13 +10,14 @@ import org.lt.project.dto.resultDto.Result;
 import org.lt.project.dto.resultDto.SuccessResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-@Service
+@Component
 public class JwtTokenService {
     private final long EXPIRATION_TIME = 1000 * 60 * 60;//1 saat
     @Value("${jwt.key}")

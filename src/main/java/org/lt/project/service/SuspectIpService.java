@@ -28,11 +28,7 @@ public class SuspectIpService {
 
     public Page<SuspectIpResponseDto> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<SuspectIpResponseDto> suspectIpResponseDtos =  repository.findAll(pageable).map(SuspectIpConverter::convert);
-        if (suspectIpResponseDtos.isEmpty()) {
-            throw new ResourceNotFoundException("Liste boş.");
-        }
-        return suspectIpResponseDtos;
+        return repository.findAll(pageable).map(SuspectIpConverter::convert);
     }
 
     public SuspectIP save(SuspectIpRequestDto suspectIpRequestDto) {
@@ -46,9 +42,7 @@ public class SuspectIpService {
     public Boolean setBanSuspectIpList(List<BanRequestDto> banRequestDtoList) {
         List<String> banList = banRequestDtoList.stream().map(BanRequestDto::ip).toList();
         List<SuspectIP> suspectIPList = repository.findAllByStatusAndIpAddressIn(IpStatus.NEW, banList);
-        if(suspectIPList.isEmpty()){
-            throw new ResourceNotFoundException("Liste boş.");
-        }
+
         List<BanningIp> banningIpList = new ArrayList<>();
         String user = UserService.getAuthenticatedUser();
         for (SuspectIP suspectIP : suspectIPList) {

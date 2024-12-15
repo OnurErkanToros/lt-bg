@@ -28,11 +28,7 @@ public class BanningIpService {
     }
 
     public List<BanningIp> getBannedIpList() {
-        List<BanningIp> bannedIpList = banningIpRepository.findAllByStatus(BanningIp.BanningIpStatus.TRANSFERRED);
-        if (bannedIpList.isEmpty()) {
-            throw new ResourceNotFoundException("Banlanmışlar listesi boş.");
-        }
-        return bannedIpList;
+        return banningIpRepository.findAllByStatus(BanningIp.BanningIpStatus.TRANSFERRED);
     }
 
     public List<BanningIp> addAllIp(List<BanningIp> banningIps) {

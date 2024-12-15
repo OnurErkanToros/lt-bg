@@ -20,6 +20,7 @@ public class AbuseDbKeyConverter {
 
     public static AbuseDbKeyResponseDto convert(AbuseDBKey abuseDBKey) {
         return AbuseDbKeyResponseDto.builder()
+                .id(abuseDBKey.getId())
                 .abuseKey(abuseDBKey.getAbuseKey())
                 .isActive(abuseDBKey.isActive())
                 .createdAt(abuseDBKey.getCreatedAt())

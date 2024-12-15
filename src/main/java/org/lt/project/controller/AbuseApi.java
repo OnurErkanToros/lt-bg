@@ -41,14 +41,15 @@ public class AbuseApi {
     public ResponseEntity<Page<AbuseDBBlackList>> getAllBlackList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
         return ResponseEntity.ok(abuseDBService.getAllBlackList(page, size));
     }
-    @PostMapping("blacklist/ban")
-    public ResponseEntity<Boolean> setBanForBlacklist() {
-        return ResponseEntity.ok(abuseDBService.setBanForBlacklist());
-    }
 
     @GetMapping("blacklist/count-new")
     public ResponseEntity<Long> getCountBlacklistNewStatus() {
         return ResponseEntity.ok(abuseDBService.getCountBlacklistNewStatus());
+    }
+
+    @PostMapping("blacklist/ban")
+    public ResponseEntity<Boolean> setBanForBlacklist() {
+        return ResponseEntity.ok(abuseDBService.setBanForBlacklist());
     }
 
     @PostMapping("check-ip/ban")

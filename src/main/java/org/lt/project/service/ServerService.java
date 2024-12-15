@@ -68,24 +68,20 @@ public class ServerService {
 
     public List<ServerResponseDto> getServerList() {
         List<Server> serverList = serverRepository.findAll();
-        List<ServerResponseDto> serverResponseDtoList = serverList.stream().map(ServerConverter::convert).toList();
-        if (serverList.isEmpty()) {
-            throw new ResourceNotFoundException("Server listesi boş.");
-        }
-        return serverResponseDtoList;
+        return serverList.stream().map(ServerConverter::convert).toList();
     }
-    public Result deleteServerByIdList(List<Integer> serverIds){
+    public boolean deleteServerByIdList(List<Integer> serverIds){
         try {
             serverRepository.deleteAllById(serverIds);
             long count = serverRepository.countByIdIn(serverIds);
             if(count==0){
-                return new SuccessResult("Kayıtlar başarıyla silindi.");
+                return true;
             } else if (count<serverIds.size()) {
-                return new ErrorResult("Kayıtların bazıları silinemedi.");
+                throw new ResourceNotFoundException("Kayıtların bazıları silinemedi.");
             }
-            return new ErrorResult("Kayıtlar silinemedi.");
+            throw new ResourceNotFoundException("Kayıtlar silinemedi.");
         } catch (Exception e) {
-            return new ErrorResult("Kayıtlar silinemedi.");
+            throw new ResourceNotFoundException("Kayıtlar silinemedi.");
         }
     }
 }

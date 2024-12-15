@@ -22,9 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-@Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@Configuration
 public class SecurityConfig {
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
     private final UserService userService;
@@ -54,14 +54,18 @@ public class SecurityConfig {
                         x.requestMatchers("/lt-api/1.0/authentication/test").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/authentication/testAdmin").hasRole("ADMIN")
                                 .requestMatchers("/lt-api/1.0/server/*").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/server/delete/*").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/server/delete").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/abuse-key/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/abuse/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/abuse/blacklist/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/abuse/check-ip/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-listener/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/log-pattern/*").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/log-pattern/delete/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/suspect-ip/*").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/banned-ip/*").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/abuse-key/delete/*").hasRole("USER")
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

@@ -13,7 +13,7 @@ public class LogListenerPatternConverter {
                 .id(entity.getId())
                 .pattern(entity.getPattern())
                 .explanation(entity.getExplanation())
-                .creUser(entity.getPattern())
+                .creUser(entity.getCreatedBy())
                 .creDate(entity.getCreatedAt())
                 .build();
     }

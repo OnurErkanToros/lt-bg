@@ -22,16 +22,14 @@ public class LogListenerRegexService {
     public List<LogListenerPatternResponseDto> getAllPattern() {
         List<LogListenerPattern> allPatternEntity = logListenerRegexRepository.findAll();
         List<LogListenerPatternResponseDto> allPattern = allPatternEntity.stream().map(LogListenerPatternConverter::convert).toList();
-        if (allPattern.isEmpty()) {
-            throw new ResourceNotFoundException("Pattern listesi boş.");
-        }
         return allPattern;
     }
 
-    public LogListenerPatternResponseDto addPattern(LogListenerPatternRequestDto logListenerPatternRequestDto) {
-        return LogListenerPatternConverter.convert(
+    public boolean addPattern(LogListenerPatternRequestDto logListenerPatternRequestDto) {
+        LogListenerPatternConverter.convert(
                 logListenerRegexRepository.save(
                         LogListenerPatternConverter.convert(logListenerPatternRequestDto)));
+        return true;
 
     }
 

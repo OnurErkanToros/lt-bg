@@ -9,6 +9,7 @@ import org.lt.project.util.convertor.AbuseDbKeyConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AbuseDBKeyService {
@@ -24,14 +25,11 @@ public class AbuseDBKeyService {
     }
 
     public List<AbuseDbKeyResponseDto> getAllKey() {
-        List<AbuseDbKeyResponseDto> abuseDbKeyResponseDtoList =repository.
+
+        return repository.
                 findAll()
                 .stream()
                 .map(AbuseDbKeyConverter::convert).toList();
-        if (abuseDbKeyResponseDtoList.isEmpty()){
-            throw new ResourceNotFoundException("Key listesi boş.");
-        }
-        return abuseDbKeyResponseDtoList;
     }
 
     public AbuseDbKeyResponseDto getLastActiveKey() {
@@ -40,5 +38,14 @@ public class AbuseDBKeyService {
             throw new ResourceNotFoundException("Key yok!");
         }
         return AbuseDbKeyConverter.convert(activeKeys.getLast());
+    }
+    public boolean deleteAbuseKey(long id){
+        Optional<AbuseDBKey> abuseDBKeyOptional = repository.findById(id);
+        if (abuseDBKeyOptional.isPresent()){
+            repository.delete(abuseDBKeyOptional.get());
+            return true;
+        }else{
+            throw new ResourceNotFoundException("İlgili key bulunamadı!");
+        }
     }
 }
