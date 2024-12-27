@@ -11,7 +11,7 @@ import org.lt.project.dto.AbuseCheckResponseDto;
 import org.lt.project.exception.customExceptions.InternalServerErrorException;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.AbuseDBCheckLog;
-import org.lt.project.model.IpStatus;
+import org.lt.project.model.SuspectIP;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class AbuseDBApiService {
             try (Response response = okHttpClient.newCall(request).execute();
                  ResponseBody responseBody = response.body()) {
                 JsonNode jsonNode = objectMapper.readTree(responseBody.string());
-                if(jsonNode.has("errors")){
+                if (jsonNode.has("errors")) {
                     throw new ResourceNotFoundException(jsonNode.get("errors").asText());
                 }
                 JsonNode jsonNodeData = jsonNode.get("data");
@@ -70,7 +70,7 @@ public class AbuseDBApiService {
                                     .countryName(responseDto.countryName())
                                     .domain(responseDto.domain())
                                     .isTor(responseDto.isTor())
-                                    .status(IpStatus.NEW)
+                                    .status(SuspectIP.IpStatus.NEW)
                                     .isPublic(responseDto.isPublic())
                                     .isWhiteListed(responseDto.isWhitelisted())
                                     .checkBy(username)
@@ -80,7 +80,7 @@ public class AbuseDBApiService {
                     );
                 }
                 return responseDto;
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new InternalServerErrorException(e.getMessage());
             }
         } catch (Exception e) {
@@ -102,16 +102,16 @@ public class AbuseDBApiService {
             if (responseBody != null) {
                 String json = responseBody.string();
                 JsonNode allNode = objectMapper.readTree(json);
-                if(allNode.has("data")){
+                if (allNode.has("data")) {
                     JsonNode dataNode = allNode.get("data");
                     List<AbuseBlackListResponseDto> list = Arrays.asList(objectMapper.readValue(dataNode.toString(), AbuseBlackListResponseDto[].class));
                     responseBody.close();
                     response.close();
                     return list;
-                }else if(allNode.has("errors")){
+                } else if (allNode.has("errors")) {
                     JsonNode errorsNode = objectMapper.readTree(json).get("errors").get(0).get("detail");
                     throw new ResourceNotFoundException(errorsNode.asText());
-                }else {
+                } else {
                     throw new ResourceNotFoundException("Abuse ile ilgili bir sorun var.");
                 }
 

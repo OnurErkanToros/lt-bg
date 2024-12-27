@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -41,31 +42,23 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors->cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(x ->
                         x.requestMatchers("/lt-api/1.0/authentication/create").permitAll()
                                 .requestMatchers("/lt-api/1.0/authentication/login").permitAll()
                 )
-                .authorizeHttpRequests(x->
-                        x.requestMatchers("/swagger-ui/*").permitAll()
-                                .requestMatchers("/v3/*").permitAll()
-                                .requestMatchers("/v3/api-docs/*").permitAll())
                 .authorizeHttpRequests(x ->
-                        x.requestMatchers("/lt-api/1.0/authentication/test").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/authentication/testAdmin").hasRole("ADMIN")
-                                .requestMatchers("/lt-api/1.0/server/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/server/delete/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/server/delete").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/abuse-key/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/abuse/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/abuse/blacklist/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/abuse/check-ip/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/log-listener/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/log-pattern/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/log-pattern/delete/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/suspect-ip/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/banned-ip/*").hasRole("USER")
-                                .requestMatchers("/lt-api/1.0/abuse-key/delete/*").hasRole("USER")
+                        x.requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll())
+                .authorizeHttpRequests(x ->
+                        x.requestMatchers("/lt-api/1.0/server/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/abuse-key/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/abuse/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/log-listener/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/log-pattern/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/suspect-ip/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/banned-ip/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/settings/**").hasRole("USER")
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
@@ -90,9 +83,9 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -4,5 +4,7 @@ import lombok.Builder;
 
 
 public record UserLoginResponseDto(String username, String token) {
-    @Builder public UserLoginResponseDto{}
+    @Builder
+    public UserLoginResponseDto {
+    }
 }

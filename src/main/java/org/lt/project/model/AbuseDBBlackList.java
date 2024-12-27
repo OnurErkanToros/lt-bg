@@ -25,7 +25,7 @@ public class AbuseDBBlackList {
     private Date createdAt;
     private String createdBy;
     @Enumerated(EnumType.STRING)
-    private IpStatus status;
+    private SuspectIP.IpStatus status;
     private Date statusAt;
     private String statusBy;
 }

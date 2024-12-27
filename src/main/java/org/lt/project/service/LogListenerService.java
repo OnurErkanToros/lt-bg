@@ -1,39 +1,45 @@
 package org.lt.project.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
+import org.lt.project.dto.LogListenerRegexResponseDto;
 import org.lt.project.dto.LogListenerStatusResponseDto;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.exception.customExceptions.BadRequestException;
 import org.lt.project.exception.customExceptions.InternalServerErrorException;
+import org.lt.project.exception.customExceptions.ResourceNotFoundException;
+import org.lt.project.model.SuspectIP;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.concurrent.Executor;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
-
 @Service
+@RequiredArgsConstructor
 public class LogListenerService extends LogListenerAdapter {
-    private SuspectIpService suspectIpService;
-
-    private final Pattern pattern;
+    @Value("${nginx.error.log.filepath}")
+    private String logFilePath;
+    private List<LogListenerRegexResponseDto> regexList;
+    private final SuspectIpService suspectIpService;
+    private final LogListenerRegexService logListenerRegexService;
+    private final SettingsService settingsService;
     private Tailer tailer;
     private boolean isServiceRunning = false;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private ExecutorService executor;
 
-
-    public LogListenerService(SuspectIpService suspectIpService) {
-        this.suspectIpService=suspectIpService;
-        String patternString = ".*access forbidden by rule.*client: ([^,]+).*host: ([^,]+).*";
-        pattern = Pattern.compile(patternString, Pattern.MULTILINE);
-    }
+    private final Map<String, List<LocalDateTime>> ipLogMap = new HashMap<>();
+    private int MAX_RETRY;
+    private Duration TIME_WINDOW;
 
     public LogListenerStatusResponseDto getStatus() {
         var startTimeString = "";
@@ -53,11 +59,13 @@ public class LogListenerService extends LogListenerAdapter {
     }
 
     public boolean startService() {
-        try{
-            if(isServiceRunning){
+        prepareService();
+        System.out.println("servis başlatıldı.");
+        try {
+            if (isServiceRunning) {
                 throw new BadRequestException("Servis zaten çalışıyor.");
             }
-            String logFilePath="src/main/resources/error.log";
+            executor = Executors.newFixedThreadPool(4);
             File logFile = new File(logFilePath);
             TailerListener tailerListener = this;
             tailer = Tailer.builder()
@@ -65,29 +73,33 @@ public class LogListenerService extends LogListenerAdapter {
                     .setTailerListener(tailerListener)
                     .setStartThread(false)
                     .setDelayDuration(Duration.ofSeconds(2))
+                    .setTailFromEnd(false)
                     .get();
-            Executor executor = newSingleThreadExecutor();
+
             executor.execute(tailer);
-            isServiceRunning=true;
+            isServiceRunning = true;
             startTime = LocalDateTime.now();
+            endTime = null;
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new InternalServerErrorException("Başlatılırken bir hata oluştu. " + e.getMessage());
         }
 
     }
 
     public boolean stopService() {
-        try{
-            if(isServiceRunning){
+        try {
+            if (isServiceRunning) {
                 tailer.close();
-                isServiceRunning=false;
+                executor.shutdownNow();
+                System.out.println(executor.isShutdown());
+                isServiceRunning = false;
                 endTime = LocalDateTime.now();
                 return true;
-            }else {
+            } else {
                 throw new BadRequestException("Zaten duruyor.");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new InternalServerErrorException("Durdurulurken bir hata oluştu. " + e.getMessage());
         }
 
@@ -95,30 +107,58 @@ public class LogListenerService extends LogListenerAdapter {
 
     @Override
     public void handle(String line) {
+        System.out.println(line);
+        for (LogListenerRegexResponseDto regex : regexList) {
+            Pattern pattern = Pattern.compile(regex.pattern(), Pattern.MULTILINE);
             Matcher matcher = pattern.matcher(line);
             if (matcher.matches()) {
                 String ip = matcher.group(1);
                 String host = matcher.group(2);
-                Integer accessForbiddenNumber = getAccessForbiddenNumber(line);
-                suspectIpService.save(SuspectIpRequestDto.builder()
-                        .ip(ip)
-                        .host(host)
-                        .accessForbiddenNumber(accessForbiddenNumber)
-                        .pattern(pattern.pattern())
-                        .createdAt(new Date())
-                        .line(line)
-                        .build());
+                LocalDateTime now = LocalDateTime.now();
+                System.out.println(ip);
+                ipLogMap.putIfAbsent(ip, new ArrayList<>());
+                ipLogMap.get(ip).add(now);
+                ipLogMap.get(ip).removeIf(timestamp -> Duration.between(timestamp, now).compareTo(TIME_WINDOW) > 0);
+                var ipLogMapSize = ipLogMap.get(ip).size();
+                if (ipLogMapSize >= MAX_RETRY && suspectIpService.isHaventThisIpAddress(ip)) {
+                    System.out.println("Suspicious IP detected: " + ip);
+                    suspectIpService.save(SuspectIpRequestDto.builder()
+                            .ip(ip)
+                            .host(host)
+                            .retry(ipLogMapSize)
+                            .pattern(pattern.pattern())
+                            .createdAt(new Date())
+                            .line(line)
+                            .status(SuspectIP.IpStatus.NEW)
+                            .statusAt(new Date())
+                            .build());
+                }
             }
-    }
-
-    private Integer getAccessForbiddenNumber(String line) {
-        String accessPatternString = ".*\\*(\\d+) access forbidden by rule.*";
-        Pattern accessPattern = Pattern.compile(accessPatternString);
-        Matcher accessMatcher = accessPattern.matcher(line);
-        if (accessMatcher.matches()) {
-            return Integer.valueOf(accessMatcher.group(1));
         }
-        return -1;
     }
 
+    private void prepareService() {
+        regexList = logListenerRegexService.getActivePatternList();
+        var maxretrySetting = settingsService.getByKey("maxretry");
+        var findTimeSetting = settingsService.getByKey("findtime");
+        var findTimeTypeSetting = settingsService.getByKey("findtimetype");
+
+        var findTime = Integer.parseInt(findTimeSetting.value());
+        if (findTimeTypeSetting == null || findTimeTypeSetting.value() == null) {
+            throw new ResourceNotFoundException("findtimetype ayarı bulunamadı.");
+        }
+        MAX_RETRY = Integer.parseInt(maxretrySetting.value());
+        switch (findTimeTypeSetting.value()) {
+            case "minute":
+                TIME_WINDOW = Duration.ofMinutes(findTime);
+                break;
+            case "second":
+                TIME_WINDOW = Duration.ofSeconds(findTime);
+                break;
+            default:
+                throw new ResourceNotFoundException(findTimeSetting.value() + " tanımsız. Sadece minute/second olabilir.");
+        }
+
+        // String patternString = ".*access forbidden by rule.*client: ([^,]+).*host: ([^,]+).*";
+    }
 }

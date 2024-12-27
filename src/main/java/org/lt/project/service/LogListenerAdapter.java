@@ -25,5 +25,5 @@ public class LogListenerAdapter implements TailerListener {
     public void init(Tailer arg0) {
     }
 
-    
+
 }

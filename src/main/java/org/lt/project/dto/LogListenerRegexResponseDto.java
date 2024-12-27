@@ -5,10 +5,11 @@ import lombok.Builder;
 import java.util.Date;
 
 @Builder
-public record LogListenerPatternResponseDto(
+public record LogListenerRegexResponseDto(
         int id,
         String pattern,
         String explanation,
+        boolean active,
         String creUser,
         Date creDate
 ) {

@@ -32,6 +32,6 @@ public class Server {
     private Date createdAt;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "is_active",nullable = false)
+    @Column(name = "is_active", nullable = false)
     private boolean isActive;
 }

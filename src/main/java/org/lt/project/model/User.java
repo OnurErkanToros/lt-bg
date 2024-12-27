@@ -1,10 +1,8 @@
 package org.lt.project.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
@@ -33,4 +31,21 @@ public class User implements UserDetails {
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<Role> authorities;
+
+    @Getter
+    public enum Role implements GrantedAuthority {
+        ROLE_USER("USER"),
+        ROLE_ADMIN("ADMIN");
+
+        private final String value;
+
+        Role(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String getAuthority() {
+            return name();
+        }
+    }
 }

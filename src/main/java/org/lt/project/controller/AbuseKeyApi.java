@@ -21,12 +21,14 @@ public class AbuseKeyApi {
     public ResponseEntity<List<AbuseDbKeyResponseDto>> getAll() {
         return ResponseEntity.ok(abuseDBKeyService.getAllKey());
     }
+
     @PostMapping("add")
     public ResponseEntity<AbuseDbKeyResponseDto> addAbuseKey(@RequestBody AbuseDbKeyRequestDto abuseDbKeyRequestDto) {
         return ResponseEntity.ok(abuseDBKeyService.addKey(abuseDbKeyRequestDto));
     }
+
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Boolean> deleteAbuseKey(@PathVariable int id){
+    public ResponseEntity<Boolean> deleteAbuseKey(@PathVariable int id) {
         return ResponseEntity.ok(abuseDBKeyService.deleteAbuseKey(id));
     }
 }

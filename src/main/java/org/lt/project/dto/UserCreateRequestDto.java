@@ -1,7 +1,7 @@
 package org.lt.project.dto;
 
 import lombok.Builder;
-import org.lt.project.model.Role;
+import org.lt.project.model.User;
 
 import java.util.Set;
 
@@ -10,6 +10,6 @@ public record UserCreateRequestDto(
         String name,
         String username,
         String password,
-        Set<Role> authorities
+        Set<User.Role> authorities
 ) {
 }

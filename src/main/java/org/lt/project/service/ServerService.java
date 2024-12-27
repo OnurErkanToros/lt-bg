@@ -5,7 +5,10 @@ import org.lt.project.dto.BanRequestDto;
 import org.lt.project.dto.SendBlockConfRequestDto;
 import org.lt.project.dto.ServerRequestDto;
 import org.lt.project.dto.ServerResponseDto;
-import org.lt.project.dto.resultDto.*;
+import org.lt.project.dto.resultDto.DataResult;
+import org.lt.project.dto.resultDto.ErrorDataResult;
+import org.lt.project.dto.resultDto.Result;
+import org.lt.project.dto.resultDto.SuccessDataResult;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.Server;
 import org.lt.project.repository.ServerRepository;
@@ -42,12 +45,13 @@ public class ServerService {
         oldIpList.addAll(banningIpList);
         return fileUtil.createAndWriteFile(oldIpList);
     }
-    public DataResult<ServerResponseDto> getServerById(int id){
+
+    public DataResult<ServerResponseDto> getServerById(int id) {
         Optional<Server> serverEntityOptional = serverRepository.findById(id);
-        if (serverEntityOptional.isPresent()){
+        if (serverEntityOptional.isPresent()) {
             ServerResponseDto serverResponseDto = ServerConverter.convert(serverEntityOptional.get());
             return new SuccessDataResult<>(serverResponseDto);
-        }else {
+        } else {
             return new ErrorDataResult<>("Böyle bir kayıt bulunamadı.");
         }
     }
@@ -70,13 +74,14 @@ public class ServerService {
         List<Server> serverList = serverRepository.findAll();
         return serverList.stream().map(ServerConverter::convert).toList();
     }
-    public boolean deleteServerByIdList(List<Integer> serverIds){
+
+    public boolean deleteServerByIdList(List<Integer> serverIds) {
         try {
             serverRepository.deleteAllById(serverIds);
             long count = serverRepository.countByIdIn(serverIds);
-            if(count==0){
+            if (count == 0) {
                 return true;
-            } else if (count<serverIds.size()) {
+            } else if (count < serverIds.size()) {
                 throw new ResourceNotFoundException("Kayıtların bazıları silinemedi.");
             }
             throw new ResourceNotFoundException("Kayıtlar silinemedi.");

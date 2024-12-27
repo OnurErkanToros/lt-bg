@@ -21,9 +21,7 @@ public class SuspectIP {
     @Column(name = "ip_address")
     private String ipAddress;
     private String host;
-    @Column(name = "access_forbidden_number")
-    private int accessForbiddenNumber;
-    @Column
+    private int retry;
     private String line;
     private Date createdAt;
     private String createdBy;
@@ -32,4 +30,10 @@ public class SuspectIP {
     private IpStatus status;
     private Date statusAt;
     private String statusBy;
+
+    public enum IpStatus {
+        NEW,
+        READY_TRANSFER,
+        BANNED
+    }
 }

@@ -1,11 +1,11 @@
 package org.lt.project.service;
 
-import org.lt.project.dto.LogListenerPatternRequestDto;
-import org.lt.project.dto.LogListenerPatternResponseDto;
+import org.lt.project.dto.LogListenerRegexRequestDto;
+import org.lt.project.dto.LogListenerRegexResponseDto;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
-import org.lt.project.model.LogListenerPattern;
+import org.lt.project.model.LogListenerRegex;
 import org.lt.project.repository.LogListenerRegexRepository;
-import org.lt.project.util.convertor.LogListenerPatternConverter;
+import org.lt.project.util.convertor.LogListenerRegexConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,22 +19,22 @@ public class LogListenerRegexService {
         this.logListenerRegexRepository = logListenerRegexRepository;
     }
 
-    public List<LogListenerPatternResponseDto> getAllPattern() {
-        List<LogListenerPattern> allPatternEntity = logListenerRegexRepository.findAll();
-        List<LogListenerPatternResponseDto> allPattern = allPatternEntity.stream().map(LogListenerPatternConverter::convert).toList();
+    public List<LogListenerRegexResponseDto> getAllPattern() {
+        List<LogListenerRegex> allPatternEntity = logListenerRegexRepository.findAll();
+        List<LogListenerRegexResponseDto> allPattern = allPatternEntity.stream().map(LogListenerRegexConverter::convert).toList();
         return allPattern;
     }
 
-    public boolean addPattern(LogListenerPatternRequestDto logListenerPatternRequestDto) {
-        LogListenerPatternConverter.convert(
+    public boolean addPattern(LogListenerRegexRequestDto logListenerRegexRequestDto) {
+        LogListenerRegexConverter.convert(
                 logListenerRegexRepository.save(
-                        LogListenerPatternConverter.convert(logListenerPatternRequestDto)));
+                        LogListenerRegexConverter.convert(logListenerRegexRequestDto)));
         return true;
 
     }
 
     public boolean deletePattern(int patternId) {
-        Optional<LogListenerPattern> currentPattern = logListenerRegexRepository.findById(patternId);
+        Optional<LogListenerRegex> currentPattern = logListenerRegexRepository.findById(patternId);
         if (currentPattern.isEmpty()) {
             throw new ResourceNotFoundException("Silinmek istenen pattern bulunamadı.");
         }
@@ -42,13 +42,20 @@ public class LogListenerRegexService {
         return true;
     }
 
-    public LogListenerPatternResponseDto updatePattern(LogListenerPatternRequestDto listenerPatternRequestDto, int id) {
-        Optional<LogListenerPattern> currentPatternEntity = logListenerRegexRepository.findById(id);
+    public LogListenerRegexResponseDto updatePattern(LogListenerRegexRequestDto listenerPatternRequestDto, int id) {
+        Optional<LogListenerRegex> currentPatternEntity = logListenerRegexRepository.findById(id);
         if (currentPatternEntity.isEmpty()) {
             throw new ResourceNotFoundException("Güncellenmek istenen pattern bulunamadı.");
         }
         currentPatternEntity.get().setPattern(listenerPatternRequestDto.pattern());
         currentPatternEntity.get().setExplanation(listenerPatternRequestDto.explanation());
-        return LogListenerPatternConverter.convert(logListenerRegexRepository.save(currentPatternEntity.get()));
+        return LogListenerRegexConverter.convert(logListenerRegexRepository.save(currentPatternEntity.get()));
+    }
+    public List<LogListenerRegexResponseDto> getActivePatternList(){
+        List<LogListenerRegex> activeRegexList = logListenerRegexRepository.findByActiveIsTrue();
+        if(activeRegexList.isEmpty()){
+            throw new ResourceNotFoundException("aktif regex yok");
+        }
+        return activeRegexList.stream().map(LogListenerRegexConverter::convert).toList();
     }
 }

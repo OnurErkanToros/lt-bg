@@ -19,9 +19,9 @@ public class BanningIpService {
     private final BanningIpRepository banningIpRepository;
 
     public Page<BanningIp> getUntransferedIpList(int page, int size) {
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<BanningIp> bannedIpList = banningIpRepository.findAllByStatus(BanningIp.BanningIpStatus.NOT_TRANSFERRED, pageable);
-        if(bannedIpList.isEmpty()){
+        if (bannedIpList.isEmpty()) {
             throw new ResourceNotFoundException("Transfer edilmemiş ip yok.");
         }
         return bannedIpList;
@@ -35,10 +35,10 @@ public class BanningIpService {
         List<String> ipList = banningIps.stream().map(BanningIp::getIp).toList();
         List<BanningIp> existingIpAddress = banningIpRepository.findByIpIn(ipList);
         List<BanningIp> filteredIpAddress = banningIps.stream()
-                    .filter(ip-> existingIpAddress
-                            .stream()
-                            .noneMatch(existingIp ->existingIp.getIp().equals(ip.getIp())))
-                    .toList();
+                .filter(ip -> existingIpAddress
+                        .stream()
+                        .noneMatch(existingIp -> existingIp.getIp().equals(ip.getIp())))
+                .toList();
         return banningIpRepository.saveAll(filteredIpAddress);
     }
 

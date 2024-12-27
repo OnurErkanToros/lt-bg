@@ -48,7 +48,7 @@ public class AbuseDBCheckLog {
     private Date checkDate;
     private String checkBy;
     @Enumerated(EnumType.STRING)
-    private IpStatus status;
+    private SuspectIP.IpStatus status;
     private Date statusAt;
     private String statusBy;
 }

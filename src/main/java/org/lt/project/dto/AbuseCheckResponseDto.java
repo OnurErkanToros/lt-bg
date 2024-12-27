@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;
 
-@JsonIgnoreProperties(value = { "hostnames","reports"})
+@JsonIgnoreProperties(value = {"hostnames", "reports"})
 public record AbuseCheckResponseDto(
         String ipAddress,
         int ipVersion,

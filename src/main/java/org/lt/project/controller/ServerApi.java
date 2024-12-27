@@ -34,9 +34,11 @@ public class ServerApi {
     public ResponseEntity<Boolean> deleteServer(@PathVariable int id) {
         return ResponseEntity.ok(serverService.deleteServer(id));
     }
-    public ResponseEntity<Boolean> deleteServerByIdList(@RequestBody List<Integer> idList){
+
+    public ResponseEntity<Boolean> deleteServerByIdList(@RequestBody List<Integer> idList) {
         return ResponseEntity.ok(serverService.deleteServerByIdList(idList));
     }
+
     @GetMapping("get-all")
     public ResponseEntity<List<ServerResponseDto>> getAllServer() {
         return ResponseEntity.ok(serverService.getServerList());

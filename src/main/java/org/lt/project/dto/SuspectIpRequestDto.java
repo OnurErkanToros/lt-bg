@@ -2,6 +2,7 @@ package org.lt.project.dto;
 
 
 import lombok.Builder;
+import org.lt.project.model.SuspectIP;
 
 import java.util.Date;
 
@@ -10,8 +11,10 @@ public record SuspectIpRequestDto(
         String ip,
         String host,
         String line,
-        int accessForbiddenNumber,
+        int retry,
         String pattern,
-        Date createdAt
+        Date createdAt,
+        SuspectIP.IpStatus status,
+        Date statusAt
 ) {
 }

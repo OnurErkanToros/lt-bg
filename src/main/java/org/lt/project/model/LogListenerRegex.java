@@ -10,18 +10,19 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name = "log_listener_patterns")
+@Table(name = "log_listener_regex")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LogListenerPattern {
+public class LogListenerRegex {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NotBlank
     private String pattern;
     private String explanation;
+    private boolean active;
     private Date createdAt;
     private String createdBy;
 }

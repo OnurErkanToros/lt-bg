@@ -23,8 +23,16 @@ public class SuspectIpController {
     }
 
     @GetMapping("get-all")
-    public ResponseEntity<Page<SuspectIpResponseDto>> getSuspectIpList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
+    public ResponseEntity<Page<SuspectIpResponseDto>> getSuspectIpList(@RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "30") int size) {
         return ResponseEntity.ok(suspectIpService.getAll(page, size));
+    }
+
+    @GetMapping("get-all-by-status")
+    public ResponseEntity<Page<SuspectIpResponseDto>> getSuspectIpListByStatus(@RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "30") int size,
+                                                                               @RequestParam(defaultValue = "NEW") SuspectIP.IpStatus status) {
+        return ResponseEntity.ok(suspectIpService.getAllByStatus(page, size, status));
     }
 
     @PostMapping("add")

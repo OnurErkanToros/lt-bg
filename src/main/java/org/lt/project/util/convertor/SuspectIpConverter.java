@@ -9,22 +9,23 @@ public class SuspectIpConverter {
     public static SuspectIP convert(SuspectIpRequestDto suspectIpRequestDto) {
         return SuspectIP.builder()
                 .ipAddress(suspectIpRequestDto.ip())
-                .accessForbiddenNumber(suspectIpRequestDto.accessForbiddenNumber())
-                .pattern(suspectIpRequestDto.pattern())
+                .retry(suspectIpRequestDto.retry())
+                .status(suspectIpRequestDto.status())
+                .statusAt(suspectIpRequestDto.statusAt())
                 .line(suspectIpRequestDto.line())
+                .pattern(suspectIpRequestDto.pattern())
                 .host(suspectIpRequestDto.host())
                 .createdAt(suspectIpRequestDto.createdAt())
-                .createdBy(UserService.getAuthenticatedUser())
                 .build();
     }
 
     public static SuspectIpResponseDto convert(SuspectIP suspectIP) {
         return SuspectIpResponseDto.builder()
                 .ip(suspectIP.getIpAddress())
-                .accessForbiddenNumber(suspectIP.getAccessForbiddenNumber())
                 .pattern(suspectIP.getPattern())
-                .line(suspectIP.getLine())
                 .host(suspectIP.getHost())
+                .line(suspectIP.getLine())
+                .retry(suspectIP.getRetry())
                 .createdAt(suspectIP.getCreatedAt())
                 .status(suspectIP.getStatus())
                 .statusBy(suspectIP.getStatusBy())

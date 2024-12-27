@@ -24,6 +24,7 @@ public class AuthenticationApi {
     public ResponseEntity<UserLoginResponseDto> login(@RequestBody UserLoginRequestDto requestDto) {
         return ResponseEntity.ok(authenticationService.authenticateUser(requestDto));
     }
+
     @PostMapping("create")
     public ResponseEntity<User> createUser(@RequestBody UserCreateRequestDto requestDto) {
         return ResponseEntity.ok(authenticationService.createUser(requestDto));

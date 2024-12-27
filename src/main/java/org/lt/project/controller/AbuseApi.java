@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AbuseApi {
     private final AbuseDBApiService abuseApiService;
     private final AbuseDBService abuseDBService;
+
     public AbuseApi(AbuseDBApiService abuseApiService, AbuseDBService abuseDBService) {
         this.abuseApiService = abuseApiService;
         this.abuseDBService = abuseDBService;

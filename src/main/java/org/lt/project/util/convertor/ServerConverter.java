@@ -11,7 +11,7 @@ import java.util.Date;
 @Component
 public class ServerConverter {
     public static Server convert(ServerRequestDto serverRequestDto) {
-        return  Server.builder()
+        return Server.builder()
                 .name(serverRequestDto.name())
                 .url(serverRequestDto.url())
                 .password(serverRequestDto.password())

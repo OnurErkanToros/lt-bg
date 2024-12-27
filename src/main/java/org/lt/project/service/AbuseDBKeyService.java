@@ -20,7 +20,7 @@ public class AbuseDBKeyService {
     }
 
     public AbuseDbKeyResponseDto addKey(AbuseDbKeyRequestDto abuseDbKeyRequestDto) {
-            AbuseDBKey entity = repository.save(AbuseDbKeyConverter.convert(abuseDbKeyRequestDto));
+        AbuseDBKey entity = repository.save(AbuseDbKeyConverter.convert(abuseDbKeyRequestDto));
         return AbuseDbKeyConverter.convert(entity);
     }
 
@@ -39,12 +39,13 @@ public class AbuseDBKeyService {
         }
         return AbuseDbKeyConverter.convert(activeKeys.getLast());
     }
-    public boolean deleteAbuseKey(long id){
+
+    public boolean deleteAbuseKey(long id) {
         Optional<AbuseDBKey> abuseDBKeyOptional = repository.findById(id);
-        if (abuseDBKeyOptional.isPresent()){
+        if (abuseDBKeyOptional.isPresent()) {
             repository.delete(abuseDBKeyOptional.get());
             return true;
-        }else{
+        } else {
             throw new ResourceNotFoundException("İlgili key bulunamadı!");
         }
     }

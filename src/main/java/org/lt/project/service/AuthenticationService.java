@@ -31,8 +31,8 @@ public class AuthenticationService {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userRequestDto.username(), userRequestDto.password()));
         if (authentication.isAuthenticated()) {
             return UserLoginResponseDto.builder()
-                            .username(userRequestDto.username())
-                            .token(jwtTokenService.generateToken(userRequestDto.username())).build()
+                    .username(userRequestDto.username())
+                    .token(jwtTokenService.generateToken(userRequestDto.username())).build()
                     ;
         }
         throw new UnauthorizedException("Username or password is incorrect");

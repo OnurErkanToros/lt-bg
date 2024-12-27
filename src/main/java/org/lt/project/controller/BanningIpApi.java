@@ -20,6 +20,7 @@ public class BanningIpApi {
     public ResponseEntity<Page<BanningIp>> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
         return ResponseEntity.ok(banningIpService.getUntransferedIpList(page, size));
     }
+
     @GetMapping("untransferred-count")
     public ResponseEntity<Long> getUnTransferredCount() {
         return ResponseEntity.ok(banningIpService.getUnTransferredCount());

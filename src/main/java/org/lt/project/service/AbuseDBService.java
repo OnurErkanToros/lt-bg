@@ -11,7 +11,7 @@ import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.AbuseDBBlackList;
 import org.lt.project.model.AbuseDBCheckLog;
 import org.lt.project.model.BanningIp;
-import org.lt.project.model.IpStatus;
+import org.lt.project.model.SuspectIP;
 import org.lt.project.repository.AbuseDBBlackListRepository;
 import org.lt.project.repository.AbuseDBCheckLogRepository;
 import org.springframework.data.domain.Page;
@@ -68,7 +68,7 @@ public class AbuseDBService {
                         .abuseConfidenceScore(abuseBlackListResponseDto.abuseConfidenceScore())
                         .createdAt(new Date())
                         .createdBy(UserService.getAuthenticatedUser())
-                        .status(IpStatus.NEW)
+                        .status(SuspectIP.IpStatus.NEW)
                         .statusBy(UserService.getAuthenticatedUser())
                         .statusAt(new Date())
                         .build())
@@ -87,7 +87,7 @@ public class AbuseDBService {
     }
 
     public Long getCountBlacklistNewStatus() {
-        return blackListRepository.countAllByStatus(IpStatus.NEW);
+        return blackListRepository.countAllByStatus(SuspectIP.IpStatus.NEW);
     }
 
     public void deleteSuspectIp(long id) {
@@ -96,24 +96,24 @@ public class AbuseDBService {
     }
 
     public boolean setBanForBlacklist() {
-        List<AbuseDBBlackList> existingBlackList = blackListRepository.findAllByStatus(IpStatus.NEW);
+        List<AbuseDBBlackList> existingBlackList = blackListRepository.findAllByStatus(SuspectIP.IpStatus.NEW);
         if (existingBlackList.isEmpty()) {
             throw new ResourceNotFoundException("Banlanacak ip yok.");
         }
 
         List<BanningIp> banningIpList = new ArrayList<>();
-            for (AbuseDBBlackList dbBlackList : existingBlackList) {
-                dbBlackList.setStatus(IpStatus.READY_TRANSFER);
-                dbBlackList.setStatusBy(UserService.getAuthenticatedUser());
-                dbBlackList.setStatusAt(new Date());
-                banningIpList.add(BanningIp.builder()
-                        .ip(dbBlackList.getIpAddress())
-                        .ipType(BanningIp.BanningIpType.BLACKLIST)
-                        .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
-                        .createdAt(new Date())
-                        .createdBy(UserService.getAuthenticatedUser())
-                        .build());
-            }
+        for (AbuseDBBlackList dbBlackList : existingBlackList) {
+            dbBlackList.setStatus(SuspectIP.IpStatus.READY_TRANSFER);
+            dbBlackList.setStatusBy(UserService.getAuthenticatedUser());
+            dbBlackList.setStatusAt(new Date());
+            banningIpList.add(BanningIp.builder()
+                    .ip(dbBlackList.getIpAddress())
+                    .ipType(BanningIp.BanningIpType.BLACKLIST)
+                    .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
+                    .createdAt(new Date())
+                    .createdBy(UserService.getAuthenticatedUser())
+                    .build());
+        }
         banningIpService.addAllIp(banningIpList);
         return !blackListRepository.saveAll(existingBlackList).isEmpty();
     }
@@ -121,24 +121,24 @@ public class AbuseDBService {
 
     public boolean setBanForCheckIp(BanRequestDto banRequestDto) {
         List<AbuseDBCheckLog> existingCheckLogList =
-                checkLogRepository.findAllByIpAddressAndStatus(banRequestDto.ip(), IpStatus.NEW);
+                checkLogRepository.findAllByIpAddressAndStatus(banRequestDto.ip(), SuspectIP.IpStatus.NEW);
         if (existingCheckLogList.isEmpty()) {
             throw new ResourceNotFoundException("Banlanacak ip yok.");
         }
-            existingCheckLogList.forEach(abuseDBCheckLog -> {
-                abuseDBCheckLog.setStatus(IpStatus.READY_TRANSFER);
-                abuseDBCheckLog.setStatusBy(UserService.getAuthenticatedUser());
-                abuseDBCheckLog.setStatusAt(new Date());
-            });
-            checkLogRepository.saveAll(existingCheckLogList);
+        existingCheckLogList.forEach(abuseDBCheckLog -> {
+            abuseDBCheckLog.setStatus(SuspectIP.IpStatus.READY_TRANSFER);
+            abuseDBCheckLog.setStatusBy(UserService.getAuthenticatedUser());
+            abuseDBCheckLog.setStatusAt(new Date());
+        });
+        checkLogRepository.saveAll(existingCheckLogList);
         banningIpService.addBannedIp(
                 BanningIp.builder()
-                            .ip(banRequestDto.ip())
+                        .ip(banRequestDto.ip())
                         .ipType(BanningIp.BanningIpType.CHECK)
                         .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
-                            .createdAt(new Date())
-                            .createdBy(UserService.getAuthenticatedUser())
-                            .build());
+                        .createdAt(new Date())
+                        .createdBy(UserService.getAuthenticatedUser())
+                        .build());
         return true;
 
     }

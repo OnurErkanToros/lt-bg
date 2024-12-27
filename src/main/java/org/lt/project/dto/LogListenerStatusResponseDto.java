@@ -11,7 +11,7 @@ public record LogListenerStatusResponseDto(
         String startTime,
         String endTime
 ) {
-    public enum LogListenerStatus{
+    public enum LogListenerStatus {
         STOPPED,
         STARTED
     }
