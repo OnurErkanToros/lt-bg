@@ -1,13 +1,10 @@
 package org.lt.project.service;
 
 
-import org.lt.project.dto.BanRequestDto;
-import org.lt.project.dto.SendBlockConfRequestDto;
 import org.lt.project.dto.ServerRequestDto;
 import org.lt.project.dto.ServerResponseDto;
 import org.lt.project.dto.resultDto.DataResult;
 import org.lt.project.dto.resultDto.ErrorDataResult;
-import org.lt.project.dto.resultDto.Result;
 import org.lt.project.dto.resultDto.SuccessDataResult;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.Server;
@@ -16,8 +13,6 @@ import org.lt.project.util.FileUtil;
 import org.lt.project.util.convertor.ServerConverter;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,18 +27,6 @@ public class ServerService {
         this.fileUtil = fileUtil;
         this.serverRepository = serverRepository;
         this.banningIpService = banningIpService;
-    }
-
-    public DataResult<List<Result>> sendBlockConf(SendBlockConfRequestDto requestDto) {
-        File file = addNewIpToFile(requestDto.ipForBan());
-        return fileUtil.sendFileByFtpForAllServers(file, requestDto.serverList());
-    }
-
-    private File addNewIpToFile(List<BanRequestDto> banningIpList) {
-        List<BanRequestDto> oldIpList = new ArrayList<>(banningIpService.getBannedIpList()
-                .stream().map(banningIp -> new BanRequestDto(banningIp.getIp())).toList());
-        oldIpList.addAll(banningIpList);
-        return fileUtil.createAndWriteFile(oldIpList);
     }
 
     public DataResult<ServerResponseDto> getServerById(int id) {

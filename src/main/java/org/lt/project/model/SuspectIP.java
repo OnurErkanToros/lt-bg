@@ -33,7 +33,6 @@ public class SuspectIP {
 
     public enum IpStatus {
         NEW,
-        READY_TRANSFER,
         BANNED
     }
 }

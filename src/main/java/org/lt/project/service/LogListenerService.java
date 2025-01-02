@@ -73,7 +73,7 @@ public class LogListenerService extends LogListenerAdapter {
                     .setTailerListener(tailerListener)
                     .setStartThread(false)
                     .setDelayDuration(Duration.ofSeconds(2))
-                    .setTailFromEnd(false)
+                    .setTailFromEnd(true)
                     .get();
 
             executor.execute(tailer);

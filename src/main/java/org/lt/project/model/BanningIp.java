@@ -21,23 +21,12 @@ public class BanningIp {
     private String ip;
     @Enumerated(EnumType.STRING)
     private BanningIpType ipType;
-    @Enumerated(EnumType.STRING)
-    private BanningIpStatus status;
-    private Date transferredAt;
-    private String transferredBy;
     private Date createdAt;
     private String createdBy;
-
-    public enum BanningIpStatus {
-        TRANSFERRED,
-        NOT_TRANSFERRED,
-        ERROR,
-    }
 
     public enum BanningIpType {
         BLACKLIST,
         CHECK,
         LISTENER,
-        MANUEL
     }
 }

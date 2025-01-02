@@ -7,11 +7,13 @@ import org.lt.project.dto.SuspectIpResponseDto;
 import org.lt.project.model.BanningIp;
 import org.lt.project.model.SuspectIP;
 import org.lt.project.repository.SuspectIpRepository;
+import org.lt.project.specification.SuspectIpSpecification;
 import org.lt.project.util.convertor.SuspectIpConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,15 +26,20 @@ import java.util.Optional;
 public class SuspectIpService {
     private final SuspectIpRepository repository;
     private final BanningIpService banningIpService;
+    private final FileService fileService;
 
 
     public Page<SuspectIpResponseDto> getAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return repository.findAll(pageable).map(SuspectIpConverter::convert);
     }
-    public Page<SuspectIpResponseDto> getAllByStatus(int page, int size, SuspectIP.IpStatus ipStatus){
+
+    public Page<SuspectIpResponseDto> getAllFiltered(int page, int size, SuspectIP.IpStatus ipStatus, String host, String ip) {
         Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
-        return repository.findAllByStatus(ipStatus,pageable).map(SuspectIpConverter::convert);
+        Specification<SuspectIP> spec = Specification.where(SuspectIpSpecification.hasIp(ip))
+                .and(SuspectIpSpecification.hasStatus(ipStatus))
+                .and(SuspectIpSpecification.hasHost(host));
+        return repository.findAll(spec,pageable).map(SuspectIpConverter::convert);
     }
 
     public SuspectIP save(SuspectIpRequestDto suspectIpRequestDto) {
@@ -47,18 +54,20 @@ public class SuspectIpService {
         List<BanningIp> banningIpList = new ArrayList<>();
         String user = UserService.getAuthenticatedUser();
         for (SuspectIP suspectIP : suspectIPList) {
-            suspectIP.setStatus(SuspectIP.IpStatus.READY_TRANSFER);
+            suspectIP.setStatus(SuspectIP.IpStatus.BANNED);
             suspectIP.setStatusAt(new Date());
             suspectIP.setStatusBy(user);
+
             banningIpList.add(
                     BanningIp.builder()
                             .ip(suspectIP.getIpAddress())
-                            .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
                             .ipType(BanningIp.BanningIpType.LISTENER)
                             .createdAt(new Date())
                             .createdBy(user)
                             .build());
         }
+        fileService.addIPAddresses(banningIpList.stream().map(BanningIp::getIp).toList());
+        banningIpService.addAllIp(banningIpList);
         repository.saveAll(suspectIPList);
         return true;
     }

@@ -20,7 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @EnableWebSecurity
@@ -37,7 +36,7 @@ public class SecurityConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
-
+    //todo user create kısmını gözden geçir
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -59,6 +58,7 @@ public class SecurityConfig {
                                 .requestMatchers("/lt-api/1.0/suspect-ip/**").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/banned-ip/**").hasRole("USER")
                                 .requestMatchers("/lt-api/1.0/settings/**").hasRole("USER")
+                                .requestMatchers("/lt-api/1.0/file/**").hasRole("USER")
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

@@ -34,6 +34,7 @@ public class AbuseDBService {
     private final AbuseDBCheckLogRepository checkLogRepository;
     private final AbuseDBBlackListRepository blackListRepository;
     private final BanningIpService banningIpService;
+    private final FileService fileService;
 
 
     public AbuseDBCheckLog addAbuseLog(@NonNull AbuseDBCheckLog abuseLog) {
@@ -103,13 +104,11 @@ public class AbuseDBService {
 
         List<BanningIp> banningIpList = new ArrayList<>();
         for (AbuseDBBlackList dbBlackList : existingBlackList) {
-            dbBlackList.setStatus(SuspectIP.IpStatus.READY_TRANSFER);
             dbBlackList.setStatusBy(UserService.getAuthenticatedUser());
             dbBlackList.setStatusAt(new Date());
             banningIpList.add(BanningIp.builder()
                     .ip(dbBlackList.getIpAddress())
                     .ipType(BanningIp.BanningIpType.BLACKLIST)
-                    .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
                     .createdAt(new Date())
                     .createdBy(UserService.getAuthenticatedUser())
                     .build());
@@ -125,21 +124,26 @@ public class AbuseDBService {
         if (existingCheckLogList.isEmpty()) {
             throw new ResourceNotFoundException("Banlanacak ip yok.");
         }
+        var user = UserService.getAuthenticatedUser();
         existingCheckLogList.forEach(abuseDBCheckLog -> {
-            abuseDBCheckLog.setStatus(SuspectIP.IpStatus.READY_TRANSFER);
-            abuseDBCheckLog.setStatusBy(UserService.getAuthenticatedUser());
+            abuseDBCheckLog.setStatusBy(user);
             abuseDBCheckLog.setStatusAt(new Date());
+            abuseDBCheckLog.setStatus(SuspectIP.IpStatus.BANNED);
         });
         checkLogRepository.saveAll(existingCheckLogList);
         banningIpService.addBannedIp(
                 BanningIp.builder()
                         .ip(banRequestDto.ip())
                         .ipType(BanningIp.BanningIpType.CHECK)
-                        .status(BanningIp.BanningIpStatus.NOT_TRANSFERRED)
                         .createdAt(new Date())
-                        .createdBy(UserService.getAuthenticatedUser())
+                        .createdBy(user)
                         .build());
+        fileService.addIPAddress(banRequestDto.ip());
         return true;
 
+    }
+
+    public boolean isIpAddressBanned(String ipAddress) {
+        return checkLogRepository.findByStatusAndIpAddress(SuspectIP.IpStatus.BANNED, ipAddress).isPresent();
     }
 }

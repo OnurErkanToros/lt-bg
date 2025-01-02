@@ -70,7 +70,8 @@ public class AbuseDBApiService {
                                     .countryName(responseDto.countryName())
                                     .domain(responseDto.domain())
                                     .isTor(responseDto.isTor())
-                                    .status(SuspectIP.IpStatus.NEW)
+                                    .status(abuseDBService.isIpAddressBanned(
+                                            responseDto.ipAddress()) ? SuspectIP.IpStatus.BANNED : SuspectIP.IpStatus.NEW)
                                     .isPublic(responseDto.isPublic())
                                     .isWhiteListed(responseDto.isWhitelisted())
                                     .checkBy(username)
