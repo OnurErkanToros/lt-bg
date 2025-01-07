@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface AbuseDBCheckLogRepository extends JpaRepository<AbuseDBCheckLog, Long> {
     List<AbuseDBCheckLog> findByIpAddress(String ipAddress);
 
-    Optional<AbuseDBCheckLog> findByStatusAndIpAddress(SuspectIP.IpStatus status, String ipAddress);
+    Optional<AbuseDBCheckLog> findFirstByStatusAndIpAddress(SuspectIP.IpStatus status, String ipAddress);
 
-    List<AbuseDBCheckLog> findAllByIpAddressAndStatus(String ipAddress, SuspectIP.IpStatus status);
+    List<AbuseDBCheckLog> findAllByIpAddressInAndStatusIn(List<String> ipAddress, List<SuspectIP.IpStatus> status);
 }

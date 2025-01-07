@@ -3,7 +3,6 @@ package org.lt.project.util.convertor;
 import org.lt.project.dto.SuspectIpRequestDto;
 import org.lt.project.dto.SuspectIpResponseDto;
 import org.lt.project.model.SuspectIP;
-import org.lt.project.service.UserService;
 
 public class SuspectIpConverter {
     public static SuspectIP convert(SuspectIpRequestDto suspectIpRequestDto) {
@@ -21,6 +20,7 @@ public class SuspectIpConverter {
 
     public static SuspectIpResponseDto convert(SuspectIP suspectIP) {
         return SuspectIpResponseDto.builder()
+                .id(suspectIP.getId())
                 .ip(suspectIP.getIpAddress())
                 .pattern(suspectIP.getPattern())
                 .host(suspectIP.getHost())

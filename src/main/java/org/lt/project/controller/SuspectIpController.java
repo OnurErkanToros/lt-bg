@@ -40,4 +40,9 @@ public class SuspectIpController {
     public ResponseEntity<Boolean> setBanSuspectIpList(@RequestBody List<BanRequestDto> banRequestDtoList) {
         return ResponseEntity.ok(suspectIpService.setBanSuspectIpList(banRequestDtoList));
     }
+
+    @PostMapping("unban")
+    public ResponseEntity<Boolean> setUnbanSuspectIpList(@RequestBody List<BanRequestDto> unbanRequestDtoList) {
+        return ResponseEntity.ok(suspectIpService.setUnbanSuspectIpList(unbanRequestDtoList));
+    }
 }

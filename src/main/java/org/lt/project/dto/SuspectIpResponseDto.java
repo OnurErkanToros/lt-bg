@@ -7,6 +7,7 @@ import java.util.Date;
 
 @Builder
 public record SuspectIpResponseDto(
+        long id,
         String ip,
         String host,
         String line,

@@ -19,7 +19,7 @@ public interface SuspectIpRepository extends JpaRepository<SuspectIP, Long>, Jpa
     @NotNull
     Page<SuspectIP> findAll(@NotNull Pageable pageable);
 
-    List<SuspectIP> findAllByStatusAndIpAddressIn(SuspectIP.IpStatus status, List<String> ipAddressList);
+    List<SuspectIP> findAllByStatusInAndIpAddressIn(List<SuspectIP.IpStatus> statusList, List<String> ipAddressList);
     Optional<SuspectIP> findFirstByIpAddress(String ipAddress);
     Page<SuspectIP> findAllByStatus(SuspectIP.IpStatus status, Pageable pageable);
 }

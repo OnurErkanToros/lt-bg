@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -28,6 +29,8 @@ public class IPDatabaseSyncService {
             Set<String> fileIPs = readIPsFromFile();
             Set<String> dbIPs = readIpsFromDB();
 
+            fileService.removeDuplicateIPAddresses();
+
             for (String ip : fileIPs) {
                 if (!dbIPs.contains(ip)) {
                     banningIpService.addBannedIp(
@@ -44,7 +47,7 @@ public class IPDatabaseSyncService {
 
             for (String ip : dbIPs) {
                 if (!fileIPs.contains(ip)) {
-                    banningIpService.deleteIpAddress(ip);
+                    banningIpService.deleteIpAddresses(List.of(ip));
                 }
             }
             return true;

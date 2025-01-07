@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/lt-api/1.0/abuse/")
@@ -56,5 +58,10 @@ public class AbuseApi {
     @PostMapping("check-ip/ban")
     public ResponseEntity<Boolean> setBanForCheckIp(@RequestBody BanRequestDto banRequestDto) {
         return ResponseEntity.ok(abuseDBService.setBanForCheckIp(banRequestDto));
+    }
+
+    @PostMapping("check-ip/unban")
+    public ResponseEntity<Boolean> setUnbanCheckIp(@RequestBody List<BanRequestDto> unbanRequestDtoList) {
+        return ResponseEntity.ok(abuseDBService.setUnbanForCheckIp(unbanRequestDtoList));
     }
 }

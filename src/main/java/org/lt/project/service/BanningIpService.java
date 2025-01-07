@@ -1,12 +1,14 @@
 package org.lt.project.service;
 
 import lombok.RequiredArgsConstructor;
+import org.lt.project.exception.customExceptions.BadRequestException;
 import org.lt.project.model.BanningIp;
 import org.lt.project.repository.BanningIpRepository;
 import org.lt.project.specification.BanningIpSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,7 @@ public class BanningIpService {
     private final BanningIpRepository banningIpRepository;
 
     public Page<BanningIp> getBannedAllIpPageable(String ip, BanningIp.BanningIpType ipType, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Specification<BanningIp> spec = Specification.where(BanningIpSpecification.hasIp(ip)).and(BanningIpSpecification.hasIpType(ipType));
         return banningIpRepository.findAll(spec,pageable);
     }
@@ -41,13 +43,21 @@ public class BanningIpService {
 
     public void addBannedIp(BanningIp banningIp) {
         Optional<BanningIp> existingBannedIp = banningIpRepository.findByIp(banningIp.getIp());
-        if (existingBannedIp.isEmpty()) {
-            banningIpRepository.save(banningIp);
+        if (existingBannedIp.isPresent()) {
+            throw new BadRequestException("Bu ip zaten engellenmiş.");
+        }
+        banningIpRepository.save(banningIp);
+    }
+
+    public void deleteIpAddresses(List<String> ipList) {
+        List<BanningIp> banningIpList = banningIpRepository.findByIpIn(ipList);
+        if (!banningIpList.isEmpty()) {
+            banningIpRepository.deleteAll(banningIpList);
         }
     }
 
-    public void deleteIpAddress(String ip) {
+    public boolean isHaveAnyIP(String ip) {
         Optional<BanningIp> optionalBanningIp = banningIpRepository.findByIp(ip);
-        optionalBanningIp.ifPresent(banningIpRepository::delete);
+        return optionalBanningIp.isPresent();
     }
 }

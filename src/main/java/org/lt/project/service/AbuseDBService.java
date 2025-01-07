@@ -119,31 +119,69 @@ public class AbuseDBService {
 
 
     public boolean setBanForCheckIp(BanRequestDto banRequestDto) {
-        List<AbuseDBCheckLog> existingCheckLogList =
-                checkLogRepository.findAllByIpAddressAndStatus(banRequestDto.ip(), SuspectIP.IpStatus.NEW);
-        if (existingCheckLogList.isEmpty()) {
-            throw new ResourceNotFoundException("Banlanacak ip yok.");
-        }
+        var existingCheckLogList =
+                checkLogRepository.findAllByIpAddressInAndStatusIn(List.of(banRequestDto.ip()), List.of(SuspectIP.IpStatus.NEW, SuspectIP.IpStatus.CANCEL_BAN));
         var user = UserService.getAuthenticatedUser();
-        existingCheckLogList.forEach(abuseDBCheckLog -> {
-            abuseDBCheckLog.setStatusBy(user);
-            abuseDBCheckLog.setStatusAt(new Date());
-            abuseDBCheckLog.setStatus(SuspectIP.IpStatus.BANNED);
-        });
-        checkLogRepository.saveAll(existingCheckLogList);
-        banningIpService.addBannedIp(
-                BanningIp.builder()
-                        .ip(banRequestDto.ip())
-                        .ipType(BanningIp.BanningIpType.CHECK)
-                        .createdAt(new Date())
-                        .createdBy(user)
-                        .build());
-        fileService.addIPAddress(banRequestDto.ip());
+        if (!existingCheckLogList.isEmpty()) {
+            existingCheckLogList.forEach(abuseDBCheckLog -> {
+                abuseDBCheckLog.setStatusBy(user);
+                abuseDBCheckLog.setStatusAt(new Date());
+                abuseDBCheckLog.setStatus(SuspectIP.IpStatus.BANNED);
+            });
+            checkLogRepository.saveAll(existingCheckLogList);
+        }
+        if (!banningIpService.isHaveAnyIP(banRequestDto.ip())) {
+            banningIpService.addBannedIp(
+                    BanningIp.builder()
+                            .ip(banRequestDto.ip())
+                            .ipType(BanningIp.BanningIpType.CHECK)
+                            .createdAt(new Date())
+                            .createdBy(user)
+                            .build());
+        }
+        if (!fileService.isHaveAnyIp(banRequestDto.ip())) {
+            fileService.addIPAddress(banRequestDto.ip());
+        }
         return true;
 
     }
 
-    public boolean isIpAddressBanned(String ipAddress) {
-        return checkLogRepository.findByStatusAndIpAddress(SuspectIP.IpStatus.BANNED, ipAddress).isPresent();
+    public Boolean setUnbanForCheckIp(List<BanRequestDto> unbanRequestDtoList) {
+        List<String> ipList = unbanRequestDtoList.stream().map(BanRequestDto::ip).toList();
+        var user = UserService.getAuthenticatedUser();
+        List<AbuseDBCheckLog> existingCheckLogList =
+                checkLogRepository.findAllByIpAddressInAndStatusIn(ipList, List.of(SuspectIP.IpStatus.BANNED));
+
+        if (!existingCheckLogList.isEmpty()) {
+            existingCheckLogList.forEach(abuseDBCheckLog -> {
+                abuseDBCheckLog.setStatusBy(user);
+                abuseDBCheckLog.setStatusAt(new Date());
+                abuseDBCheckLog.setStatus(SuspectIP.IpStatus.CANCEL_BAN);
+            });
+            checkLogRepository.saveAll(existingCheckLogList);
+        }
+        List<String> ipListForBanningIp = new ArrayList<>();
+        List<String> ipListForFile = new ArrayList<>();
+        for (String ip : ipList) {
+            if (banningIpService.isHaveAnyIP(ip)) {
+                ipListForBanningIp.add(ip);
+            }
+            if (fileService.isHaveAnyIp(ip)) {
+                ipListForFile.add(ip);
+            }
+        }
+        if (!ipListForBanningIp.isEmpty()) {
+            banningIpService.deleteIpAddresses(ipListForBanningIp);
+        }
+        if (!ipListForFile.isEmpty()) {
+            fileService.removeIPAddresses(ipListForFile);
+        }
+        return true;
     }
+
+    public boolean isIpAddressBanned(String ipAddress) {
+        return checkLogRepository.findFirstByStatusAndIpAddress(SuspectIP.IpStatus.BANNED, ipAddress).isPresent();
+    }
+
+
 }

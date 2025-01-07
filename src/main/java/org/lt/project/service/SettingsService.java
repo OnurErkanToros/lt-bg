@@ -51,7 +51,7 @@ public class SettingsService {
     public SettingsResponseDto getByKey(String key){
         Optional<Settings> settingsOptional = settingsRepository.findFirstBySettingKey(key);
         if (settingsOptional.isEmpty()){
-            throw new ResourceNotFoundException("İlgili key için sonuç yok.");
+            throw new ResourceNotFoundException(String.format("%s ayarı bulunamadı!",key));
         }
         return SettingsConverter.convert(settingsOptional.get());
     }
@@ -59,7 +59,7 @@ public class SettingsService {
     public SettingsResponseDto updateValueByKey(String key,String value){
         Optional<Settings> settingsOptional = settingsRepository.findFirstBySettingKey(key);
         if(settingsOptional.isEmpty()){
-            throw new ResourceNotFoundException("İlgili key için sonuç yok.");
+            throw new ResourceNotFoundException(String.format("Güncellemek için %s ayarı bulunamadı!",key));
         }
         settingsOptional.get().setValue(value);
         settingsOptional.get().setUpdatedAt(new Date());

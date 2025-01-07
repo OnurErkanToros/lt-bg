@@ -24,14 +24,14 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class SuspectIpService {
-    private final SuspectIpRepository repository;
+    private final SuspectIpRepository suspectIpRepository;
     private final BanningIpService banningIpService;
     private final FileService fileService;
 
 
     public Page<SuspectIpResponseDto> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return repository.findAll(pageable).map(SuspectIpConverter::convert);
+        return suspectIpRepository.findAll(pageable).map(SuspectIpConverter::convert);
     }
 
     public Page<SuspectIpResponseDto> getAllFiltered(int page, int size, SuspectIP.IpStatus ipStatus, String host, String ip) {
@@ -39,40 +39,87 @@ public class SuspectIpService {
         Specification<SuspectIP> spec = Specification.where(SuspectIpSpecification.hasIp(ip))
                 .and(SuspectIpSpecification.hasStatus(ipStatus))
                 .and(SuspectIpSpecification.hasHost(host));
-        return repository.findAll(spec,pageable).map(SuspectIpConverter::convert);
+        return suspectIpRepository.findAll(spec, pageable).map(SuspectIpConverter::convert);
     }
 
     public SuspectIP save(SuspectIpRequestDto suspectIpRequestDto) {
         SuspectIP suspectIP = SuspectIpConverter.convert(suspectIpRequestDto);
-        return repository.save(suspectIP);
+        return suspectIpRepository.save(suspectIP);
     }
 
     public Boolean setBanSuspectIpList(List<BanRequestDto> banRequestDtoList) {
         List<String> banList = banRequestDtoList.stream().map(BanRequestDto::ip).toList();
-        List<SuspectIP> suspectIPList = repository.findAllByStatusAndIpAddressIn(SuspectIP.IpStatus.NEW, banList);
-
-        List<BanningIp> banningIpList = new ArrayList<>();
         String user = UserService.getAuthenticatedUser();
-        for (SuspectIP suspectIP : suspectIPList) {
-            suspectIP.setStatus(SuspectIP.IpStatus.BANNED);
-            suspectIP.setStatusAt(new Date());
-            suspectIP.setStatusBy(user);
-
-            banningIpList.add(
-                    BanningIp.builder()
-                            .ip(suspectIP.getIpAddress())
-                            .ipType(BanningIp.BanningIpType.LISTENER)
-                            .createdAt(new Date())
-                            .createdBy(user)
-                            .build());
+        List<SuspectIP> suspectIPListNewAndCancelBan = suspectIpRepository
+                .findAllByStatusInAndIpAddressIn(List.of(SuspectIP.IpStatus.NEW,
+                        SuspectIP.IpStatus.CANCEL_BAN), banList);
+        if (!suspectIPListNewAndCancelBan.isEmpty()) {
+            suspectIPListNewAndCancelBan.forEach(suspectIP -> {
+                suspectIP.setStatus(SuspectIP.IpStatus.BANNED);
+                suspectIP.setStatusAt(new Date());
+                suspectIP.setStatusBy(user);
+            });
+            suspectIpRepository.saveAll(suspectIPListNewAndCancelBan);
         }
-        fileService.addIPAddresses(banningIpList.stream().map(BanningIp::getIp).toList());
-        banningIpService.addAllIp(banningIpList);
-        repository.saveAll(suspectIPList);
+
+        List<BanningIp> ipListForBanningIp = new ArrayList<>();
+        List<String> ipListForFile = new ArrayList<>();
+        for (String ip : banList) {
+            if (!banningIpService.isHaveAnyIP(ip)) {
+                ipListForBanningIp.add(
+                        BanningIp.builder()
+                                .ip(ip)
+                                .ipType(BanningIp.BanningIpType.LISTENER)
+                                .createdAt(new Date())
+                                .createdBy(user)
+                                .build());
+            }
+            if (!fileService.isHaveAnyIp(ip)) {
+                ipListForFile.add(ip);
+            }
+        }
+        if (!ipListForFile.isEmpty()) {
+            fileService.addIPAddresses(ipListForBanningIp.stream().map(BanningIp::getIp).toList());
+        }
+        if (!ipListForBanningIp.isEmpty()) {
+            banningIpService.addAllIp(ipListForBanningIp);
+        }
         return true;
     }
-    public boolean isHaventThisIpAddress(String ipAddress){
-        Optional<SuspectIP> suspectIP = repository.findFirstByIpAddress(ipAddress);
-        return suspectIP.isEmpty();
+
+    public Boolean setUnbanSuspectIpList(List<BanRequestDto> unbanRequestDtoList) {
+        List<String> unbanList = unbanRequestDtoList.stream().map(BanRequestDto::ip).toList();
+        List<SuspectIP> suspectIPList = suspectIpRepository.findAllByStatusInAndIpAddressIn(List.of(SuspectIP.IpStatus.BANNED), unbanList);
+        String user = UserService.getAuthenticatedUser();
+        suspectIPList.forEach(suspectIP -> {
+            suspectIP.setStatus(SuspectIP.IpStatus.CANCEL_BAN);
+            suspectIP.setStatusAt(new Date());
+            suspectIP.setStatusBy(user);
+        });
+        if (!suspectIPList.isEmpty()) {
+            suspectIpRepository.saveAll(suspectIPList);
+        }
+        List<String> ipListForBanningIp = new ArrayList<>();
+        List<String> ipListForFile = new ArrayList<>();
+        for (String ip : unbanList) {
+            if (banningIpService.isHaveAnyIP(ip)) {
+                ipListForBanningIp.add(ip);
+            }
+            if (fileService.isHaveAnyIp(ip)) {
+                ipListForFile.add(ip);
+            }
+        }
+        if (!ipListForBanningIp.isEmpty()) {
+            banningIpService.deleteIpAddresses(ipListForBanningIp);
+        }
+        if (!ipListForFile.isEmpty()) {
+            fileService.removeIPAddresses(unbanList);
+        }
+        return true;
+    }
+
+    public boolean isHaveAnyIp(String ipAddress) {
+        Optional<SuspectIP> suspectIP = suspectIpRepository.findFirstByIpAddress(ipAddress);
+        return suspectIP.isPresent();
     }
 }

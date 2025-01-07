@@ -120,7 +120,7 @@ public class LogListenerService extends LogListenerAdapter {
                 ipLogMap.get(ip).add(now);
                 ipLogMap.get(ip).removeIf(timestamp -> Duration.between(timestamp, now).compareTo(TIME_WINDOW) > 0);
                 var ipLogMapSize = ipLogMap.get(ip).size();
-                if (ipLogMapSize >= MAX_RETRY && suspectIpService.isHaventThisIpAddress(ip)) {
+                if (ipLogMapSize >= MAX_RETRY && !suspectIpService.isHaveAnyIp(ip)) {
                     System.out.println("Suspicious IP detected: " + ip);
                     suspectIpService.save(SuspectIpRequestDto.builder()
                             .ip(ip)
@@ -139,13 +139,19 @@ public class LogListenerService extends LogListenerAdapter {
 
     private void prepareService() {
         regexList = logListenerRegexService.getActivePatternList();
-        var maxretrySetting = settingsService.getByKey("maxretry");
-        var findTimeSetting = settingsService.getByKey("findtime");
-        var findTimeTypeSetting = settingsService.getByKey("findtimetype");
+        var maxretrySetting = settingsService.getByKey("maxRetry");
+        var findTimeSetting = settingsService.getByKey("findTime");
+        var findTimeTypeSetting = settingsService.getByKey("findTimeType");
 
         var findTime = Integer.parseInt(findTimeSetting.value());
         if (findTimeTypeSetting == null || findTimeTypeSetting.value() == null) {
             throw new ResourceNotFoundException("findtimetype ayarı bulunamadı.");
+        }
+        if (maxretrySetting==null || maxretrySetting.value()==null){
+            throw new ResourceNotFoundException("maxretry ayarı bulunamadı");
+        }
+        if (findTimeSetting==null || findTimeSetting.value()==null){
+            throw new ResourceNotFoundException("maxretry ayarı bulunamadı");
         }
         MAX_RETRY = Integer.parseInt(maxretrySetting.value());
         switch (findTimeTypeSetting.value()) {

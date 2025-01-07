@@ -9,10 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,8 +25,40 @@ public class FileService {
         return removeIPAddresses(Collections.singletonList(ipAddress));
     }
 
+    public boolean isHaveAnyIp(String ip) {
+        try {
+            List<String> lines = Files.readAllLines(blockConfPath);
+            Set<String> currentIPs = new HashSet<>(lines);
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(blockConfPath.toFile(), true))) {
+                String lineToAdd = "deny " + ip + ";";
+                return currentIPs.contains(lineToAdd);
+            }
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    public boolean removeDuplicateIPAddresses() {
+        try {
+            List<String> lines = Files.readAllLines(blockConfPath);
+            Set<String> uniqueLines = new LinkedHashSet<>(lines);
+            if (lines.size() == uniqueLines.size()) {
+                System.out.println("Dosyada tekrar eden kayıt yok.");
+                return false;
+            }
+            Files.write(blockConfPath, uniqueLines);
+            System.out.println("Tekrar eden kayıtlar silindi.");
+            return true;
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+
     public boolean addIPAddresses(List<String> ipAddresses) {
         var isAdded = false;
+        List<String> addedIpList = new ArrayList<>();
         try {
             List<String> lines = Files.readAllLines(blockConfPath);
             Set<String> currentIPs = new HashSet<>(lines);
@@ -41,12 +70,20 @@ public class FileService {
                         writer.write(lineToAdd);
                         writer.newLine();
                         isAdded = true;
+                    } else {
+                        addedIpList.add(ip);
                     }
                 }
             }
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
         }
+        if (addedIpList.size() == 1) {
+            throw new BadRequestException("Bu ip zaten dosyada var, yani banlanmış. " + addedIpList.getFirst());
+        } else if (addedIpList.size() > 1) {
+            throw new BadRequestException("Bu ipler zaten dosyada var, yani banlanmış. " + addedIpList);
+        }
+
         return isAdded;
     }
 
@@ -63,6 +100,7 @@ public class FileService {
 
             if (lines.size() == updatedLines.size()) {
                 throw new BadRequestException("Hiçbir IP bulunamadı, silme işlemi yapılmadı.");
+
             } else {
                 Files.write(blockConfPath, updatedLines);
                 System.out.println("IP adres(ler)i silindi: " + ipAddresses);
