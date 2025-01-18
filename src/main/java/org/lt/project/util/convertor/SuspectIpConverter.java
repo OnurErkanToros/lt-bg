@@ -6,16 +6,17 @@ import org.lt.project.model.SuspectIP;
 
 public class SuspectIpConverter {
     public static SuspectIP convert(SuspectIpRequestDto suspectIpRequestDto) {
-        return SuspectIP.builder()
-                .ipAddress(suspectIpRequestDto.ip())
-                .retry(suspectIpRequestDto.retry())
-                .status(suspectIpRequestDto.status())
-                .statusAt(suspectIpRequestDto.statusAt())
-                .line(suspectIpRequestDto.line())
-                .pattern(suspectIpRequestDto.pattern())
-                .host(suspectIpRequestDto.host())
-                .createdAt(suspectIpRequestDto.createdAt())
-                .build();
+    return SuspectIP.builder()
+        .ipAddress(suspectIpRequestDto.ip())
+        .retry(suspectIpRequestDto.retry())
+        .status(suspectIpRequestDto.status())
+        .statusAt(suspectIpRequestDto.statusAt())
+        .statusBy(suspectIpRequestDto.statusBy())
+        .line(suspectIpRequestDto.line())
+        .pattern(suspectIpRequestDto.pattern())
+        .host(suspectIpRequestDto.host())
+        .createdAt(suspectIpRequestDto.createdAt())
+        .build();
     }
 
     public static SuspectIpResponseDto convert(SuspectIP suspectIP) {

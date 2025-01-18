@@ -18,14 +18,11 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final JwtTokenService jwtTokenService;
 
     public UserService(UserRepository userRepository,
-                       BCryptPasswordEncoder bCryptPasswordEncoder,
-                       JwtTokenService jwtTokenService) {
+                       BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.jwtTokenService = jwtTokenService;
     }
 
     public static String getAuthenticatedUser() {
@@ -62,6 +59,9 @@ public class UserService implements UserDetailsService {
                 .accountNonLocked(true)
                 .build();
         return userRepository.save(user);
+    }
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
 

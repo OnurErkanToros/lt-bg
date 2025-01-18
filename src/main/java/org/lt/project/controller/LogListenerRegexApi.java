@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/lt-api/1.0/log-pattern/")
+@RequestMapping("/log-pattern/")
 @SecurityRequirement(name = "Authorization")
 @RequiredArgsConstructor
 public class LogListenerRegexApi {

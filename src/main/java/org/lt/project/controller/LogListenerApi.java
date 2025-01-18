@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/lt-api/1.0/log-listener/")
+@RequestMapping("/log-listener/")
 @SecurityRequirement(name = "Authorization")
 public class LogListenerApi {
     private final LogListenerService listenerService;

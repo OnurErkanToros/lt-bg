@@ -9,7 +9,7 @@ import java.util.Date;
 public record ServerResponseDto(
         int id,
         String name,
-        String url,
+        String host,
         String username,
         String password,
         int port,
@@ -17,7 +17,8 @@ public record ServerResponseDto(
         String fileName,
         String createdBy,
         Date createdAt,
-        boolean active
+        boolean isActive,
+        boolean isSFTP
 ) {
 
 }

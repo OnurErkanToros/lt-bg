@@ -19,7 +19,7 @@ public class Server {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    private String url;
+    private String host;
     private String username;
     private String password;
     private int port;
@@ -34,4 +34,6 @@ public class Server {
     private String createdBy;
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
+    @Column(name = "is_sftp")
+    private boolean isSFTP;
 }

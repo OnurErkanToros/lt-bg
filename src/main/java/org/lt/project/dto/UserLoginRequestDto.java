@@ -1,7 +1,13 @@
 package org.lt.project.dto;
 
-public record UserLoginRequestDto(
-        String username,
-        String password
-) {
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class UserLoginRequestDto {
+    @NotBlank(message = "Kullanıcı adı zorunludur")
+    private String username;
+
+    @NotBlank(message = "Şifre zorunludur")
+    private String password;
 }

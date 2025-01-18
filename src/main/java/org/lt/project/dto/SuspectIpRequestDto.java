@@ -15,6 +15,7 @@ public record SuspectIpRequestDto(
         String pattern,
         Date createdAt,
         SuspectIP.IpStatus status,
-        Date statusAt
+        Date statusAt,
+        String statusBy
 ) {
 }

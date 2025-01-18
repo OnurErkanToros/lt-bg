@@ -22,6 +22,7 @@ public class LogListenerRegexConverter {
     public static LogListenerRegex convert(LogListenerRegexRequestDto logListenerRegexRequestDto) {
         return LogListenerRegex.builder()
                 .pattern(logListenerRegexRequestDto.pattern())
+                .active(true)
                 .explanation(logListenerRegexRequestDto.explanation())
                 .createdBy(UserService.getAuthenticatedUser())
                 .createdAt(new Date())

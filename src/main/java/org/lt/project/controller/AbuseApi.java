@@ -2,35 +2,41 @@ package org.lt.project.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
-import org.lt.project.dto.AbuseCheckResponseDto;
-import org.lt.project.dto.BanRequestDto;
 import org.lt.project.model.AbuseDBBlackList;
 import org.lt.project.service.AbuseDBApiService;
 import org.lt.project.service.AbuseDBService;
+import org.lt.project.validator.IpAddressValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/lt-api/1.0/abuse/")
+@RequestMapping("/abuse/")
 @SecurityRequirement(name = "Authorization")
 public class AbuseApi {
     private final AbuseDBApiService abuseApiService;
     private final AbuseDBService abuseDBService;
+    private final IpAddressValidator ipAddressValidator;
 
-    public AbuseApi(AbuseDBApiService abuseApiService, AbuseDBService abuseDBService) {
+    public AbuseApi(AbuseDBApiService abuseApiService, 
+                    AbuseDBService abuseDBService,
+                    IpAddressValidator ipAddressValidator) {
         this.abuseApiService = abuseApiService;
         this.abuseDBService = abuseDBService;
+        this.ipAddressValidator = ipAddressValidator;
     }
 
     @PostMapping("check-ip")
-    public ResponseEntity<AbuseCheckResponseDto> checkIp(@Valid @RequestParam @Positive int maxAgeInDays,
-                                                         @RequestParam @Pattern(regexp = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b") String ipAddress) {
+    public ResponseEntity<?> checkIp(@Valid @RequestParam @Positive int maxAgeInDays,
+                                    @RequestParam String ipAddress) {
+        if (!ipAddressValidator.isValidIpAddress(ipAddress)) {
+            return ResponseEntity
+                .badRequest()
+                .body("Geçersiz IP adresi formatı");
+        }
         return ResponseEntity.ok(abuseApiService.checkIp(maxAgeInDays, ipAddress));
     }
 
@@ -53,15 +59,5 @@ public class AbuseApi {
     @PostMapping("blacklist/ban")
     public ResponseEntity<Boolean> setBanForBlacklist() {
         return ResponseEntity.ok(abuseDBService.setBanForBlacklist());
-    }
-
-    @PostMapping("check-ip/ban")
-    public ResponseEntity<Boolean> setBanForCheckIp(@RequestBody BanRequestDto banRequestDto) {
-        return ResponseEntity.ok(abuseDBService.setBanForCheckIp(banRequestDto));
-    }
-
-    @PostMapping("check-ip/unban")
-    public ResponseEntity<Boolean> setUnbanCheckIp(@RequestBody List<BanRequestDto> unbanRequestDtoList) {
-        return ResponseEntity.ok(abuseDBService.setUnbanForCheckIp(unbanRequestDtoList));
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/lt-api/1.0/settings/")
+@RequestMapping("/settings/")
 @SecurityRequirement(name = "Authorization")
 @RequiredArgsConstructor
 public class SettingsApi {
@@ -42,8 +42,13 @@ public class SettingsApi {
     public ResponseEntity<SettingsResponseDto> update(@RequestBody SettingsRequestDto settingsRequestDto,@PathVariable long id){
         return ResponseEntity.ok(settingsService.update(settingsRequestDto,id));
     }
-    @PatchMapping("update/{key}/{value}")
-    public ResponseEntity<SettingsResponseDto> update(@PathVariable String key, @PathVariable String value){
+    @PatchMapping("update")
+    public ResponseEntity<SettingsResponseDto> update(@RequestParam String key, @RequestParam String value){
+        System.out.println(key);
         return ResponseEntity.ok(settingsService.updateValueByKey(key, value));
+    }
+    @PostMapping("create-settings")
+    public ResponseEntity<Boolean> createSettings(){
+        return ResponseEntity.ok(settingsService.createSettings());
     }
 }

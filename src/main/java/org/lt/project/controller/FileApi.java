@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/lt-api/1.0/file/")
+@RequestMapping("/file/")
 @SecurityRequirement(name = "Authorization")
 @RequiredArgsConstructor
 public class FileApi {

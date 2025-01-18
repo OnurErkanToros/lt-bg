@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.lt.project.dto.ServerRequestDto;
 import org.lt.project.dto.ServerResponseDto;
+import org.lt.project.dto.resultDto.Result;
 import org.lt.project.service.ServerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/lt-api/1.0/server/")
+@RequestMapping("/server/")
 @SecurityRequirement(name = "Authorization")
 @RequiredArgsConstructor
 public class ServerApi {
@@ -35,5 +36,15 @@ public class ServerApi {
     @GetMapping("get-all")
     public ResponseEntity<List<ServerResponseDto>> getAllServer() {
         return ResponseEntity.ok(serverService.getServerList());
+    }
+
+    @PostMapping("send-server")
+    public ResponseEntity<List<Result>> sendServer(@RequestBody List<ServerRequestDto> serverRequestDtos) {
+        return ResponseEntity.ok(serverService.transferFile(serverRequestDtos));
+    }
+
+    @PatchMapping("update/{id}")
+    public ResponseEntity<ServerResponseDto> updateServer(@RequestBody ServerRequestDto requestDto, @PathVariable int id) {
+        return ResponseEntity.ok(serverService.updateServer(requestDto, id));
     }
 }

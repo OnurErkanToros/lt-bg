@@ -10,13 +10,10 @@ import org.lt.project.dto.AbuseBlackListResponseDto;
 import org.lt.project.dto.AbuseCheckResponseDto;
 import org.lt.project.exception.customExceptions.InternalServerErrorException;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
-import org.lt.project.model.AbuseDBCheckLog;
-import org.lt.project.model.SuspectIP;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -56,29 +53,8 @@ public class AbuseDBApiService {
                 }
                 JsonNode jsonNodeData = jsonNode.get("data");
                 AbuseCheckResponseDto responseDto = objectMapper.readValue(jsonNodeData.toString(), AbuseCheckResponseDto.class);
-                if (responseDto != null) {
-                    String username = UserService.getAuthenticatedUser();
-                    abuseDBService.addAbuseLog(
-                            AbuseDBCheckLog.builder()
-                                    .ipAddress(responseDto.ipAddress())
-                                    .usageType(responseDto.usageType())
-                                    .ipVersion(responseDto.ipVersion())
-                                    .numDistinctUsers(responseDto.numDistinctUsers())
-                                    .abuseConfidenceScore(responseDto.abuseConfidenceScore())
-                                    .isp(responseDto.isp())
-                                    .countryCode(responseDto.countryCode())
-                                    .countryName(responseDto.countryName())
-                                    .domain(responseDto.domain())
-                                    .isTor(responseDto.isTor())
-                                    .status(abuseDBService.isIpAddressBanned(
-                                            responseDto.ipAddress()) ? SuspectIP.IpStatus.BANNED : SuspectIP.IpStatus.NEW)
-                                    .isPublic(responseDto.isPublic())
-                                    .isWhiteListed(responseDto.isWhitelisted())
-                                    .checkBy(username)
-                                    .checkDate(new Date())
-                                    .lastReportedAt(responseDto.lastReportedAt())
-                                    .build()
-                    );
+                if (responseDto == null) {
+                    throw new ResourceNotFoundException("Abuse sorgulaması ile ilgili bir sorun var.");
                 }
                 return responseDto;
             } catch (Exception e) {
