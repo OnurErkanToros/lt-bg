@@ -9,7 +9,7 @@ import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.SuspectIP;
 import org.lt.project.repository.SuspectIpRepository;
 import org.lt.project.specification.SuspectIpSpecification;
-import org.lt.project.util.convertor.SuspectIpConverter;
+import org.lt.project.util.converter.SuspectIpConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

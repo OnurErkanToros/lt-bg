@@ -16,7 +16,7 @@ import org.lt.project.dto.resultDto.*;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.Server;
 import org.lt.project.repository.ServerRepository;
-import org.lt.project.util.convertor.ServerConverter;
+import org.lt.project.util.converter.ServerConverter;
 import org.springframework.stereotype.Service;
 
 @Service

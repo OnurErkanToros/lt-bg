@@ -78,6 +78,7 @@ public class SecurityConfig {
                     .requestMatchers("/banned-ip/**").hasRole("USER")
                     .requestMatchers("/settings/**").hasRole("USER")
                     .requestMatchers("/file/**").hasRole("USER")
+                    .requestMatchers("/ip-check/**").hasRole("USER")
                     .anyRequest().authenticated());
         } else {
             security.authorizeHttpRequests(x -> x
@@ -93,6 +94,7 @@ public class SecurityConfig {
                     .requestMatchers("/banned-ip/**").hasRole("USER")
                     .requestMatchers("/settings/**").hasRole("USER")
                     .requestMatchers("/file/**").hasRole("USER")
+                    .requestMatchers("/ip-check/**").hasRole("USER")
                     .anyRequest().authenticated());
         }
 

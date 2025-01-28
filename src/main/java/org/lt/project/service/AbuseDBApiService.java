@@ -68,7 +68,7 @@ public class AbuseDBApiService {
     public List<AbuseBlackListResponseDto> getBlackList() {
         final var activeKey = keyService.getLastActiveKey();
         try {
-            String blackListUrl = this.url + "blacklist";
+            String blackListUrl = url + "blacklist";
             Request request = new Request.Builder()
                     .url(blackListUrl)
                     .header("Accept", "application/json")

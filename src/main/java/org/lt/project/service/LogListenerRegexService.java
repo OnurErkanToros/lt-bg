@@ -5,7 +5,7 @@ import org.lt.project.dto.LogListenerRegexResponseDto;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.LogListenerRegex;
 import org.lt.project.repository.LogListenerRegexRepository;
-import org.lt.project.util.convertor.LogListenerRegexConverter;
+import org.lt.project.util.converter.LogListenerRegexConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

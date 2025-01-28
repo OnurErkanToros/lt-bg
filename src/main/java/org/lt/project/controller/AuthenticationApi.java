@@ -38,13 +38,11 @@ public class AuthenticationApi {
 
     @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody UserLoginRequestDto requestDto, HttpServletRequest request) {
-        // Önce client IP'sini al
         String clientId = request.getHeader("X-Forwarded-For");
         if (clientId == null) {
             clientId = request.getRemoteAddr();
         }
 
-        // Rate limit kontrolü
         if (rateLimitFilter.isBlacklisted(clientId)) {
             return ResponseEntity
                 .status(HttpStatus.TOO_MANY_REQUESTS)
@@ -77,7 +75,7 @@ public class AuthenticationApi {
             return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse(
-                    "Authentication failed",
+                    "Kullanıcı adı yada şifre yanlış.",
                     HttpStatus.UNAUTHORIZED.value(),
                     LocalDateTime.now()
                 ));

@@ -1,4 +1,4 @@
-package org.lt.project.util.convertor;
+package org.lt.project.util.converter;
 
 import org.lt.project.dto.LogListenerRegexRequestDto;
 import org.lt.project.dto.LogListenerRegexResponseDto;

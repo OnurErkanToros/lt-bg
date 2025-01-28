@@ -5,7 +5,7 @@ import org.lt.project.dto.AbuseDbKeyResponseDto;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.AbuseDBKey;
 import org.lt.project.repository.AbuseDBKeyRepository;
-import org.lt.project.util.convertor.AbuseDbKeyConverter;
+import org.lt.project.util.converter.AbuseDbKeyConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

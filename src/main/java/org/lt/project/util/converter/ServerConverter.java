@@ -1,4 +1,4 @@
-package org.lt.project.util.convertor;
+package org.lt.project.util.converter;
 
 import java.util.Date;
 import org.lt.project.dto.ServerRequestDto;

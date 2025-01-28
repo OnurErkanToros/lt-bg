@@ -4,14 +4,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.lt.project.dto.SettingsRequestDto;
 import org.lt.project.dto.SettingsResponseDto;
 import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.Settings;
 import org.lt.project.repository.SettingsRepository;
-import org.lt.project.util.convertor.SettingsConverter;
+import org.lt.project.util.converter.SettingsConverter;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,6 +25,7 @@ public class SettingsService {
       var maxRetry = settingsRepository.findFirstBySettingKey("maxRetry");
       var findTime = settingsRepository.findFirstBySettingKey("findTime");
       var findTimeType = settingsRepository.findFirstBySettingKey("findTimeType");
+      var maxMindDatabaseCountryFilePathSetting = settingsRepository.findFirstBySettingKey("maxMindDatabaseCountryFilePath");
       if (blokConfPathSetting.isEmpty()) {
         var setting =SettingsConverter.convert(
             SettingsRequestDto.builder()
@@ -83,6 +83,18 @@ public class SettingsService {
                 .title("Aranacak zaman aralığının tipi")
                 .variableType(Settings.VariableType.STRING)
                 .value("minute")
+                .build());
+        settingsRepository.save(setting);
+      }
+      if (maxMindDatabaseCountryFilePathSetting.isEmpty()) {
+        var setting = SettingsConverter.convert(
+            SettingsRequestDto.builder()
+                .settingType(Settings.SettingType.LOG_LISTENER)
+                .description("maxmind database konumu")
+                .key("maxMindDatabaseCountryFilePath")
+                .title("maxmind database konumu")
+                .variableType(Settings.VariableType.STRING)
+                .value("/var/lib/GeoIP/GeoLite2-Country.mmdb")
                 .build());
         settingsRepository.save(setting);
       }
