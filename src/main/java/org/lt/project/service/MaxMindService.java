@@ -18,6 +18,7 @@ public class MaxMindService {
   private final GeoIPCountryService geoIPCountryService;
 
   public boolean checkCountry(String ipAddress) {
+    try{
     var maxMindDatabaseCountryFilePathSetting =
         settingsService.getByKey("maxMindDatabaseCountryFilePath");
     File countryDatabase = new File(maxMindDatabaseCountryFilePathSetting.value());
@@ -32,6 +33,9 @@ public class MaxMindService {
       return !geoIPCountryService.isAllowed(countryResponse.getCountry().getIsoCode());
     } catch (IOException | GeoIp2Exception e) {
       throw new RuntimeException(e.getMessage());
+    }}
+    catch (Exception e){
+        return false;
     }
   }
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name = "allowed_country")
+@Table(name = "countries")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

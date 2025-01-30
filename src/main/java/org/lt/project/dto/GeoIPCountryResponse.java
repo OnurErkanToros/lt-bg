@@ -10,5 +10,6 @@ public record GeoIPCountryResponse(
         String countryName,
         String isoCode,
         Date createdAt,
-        String createdBy
+        String createdBy,
+        boolean allowed
 ) {}

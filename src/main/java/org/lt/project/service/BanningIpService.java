@@ -24,50 +24,54 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BanningIpService {
-    private final BanningIpRepository banningIpRepository;
+  private final BanningIpRepository banningIpRepository;
   private final FileService fileService;
   private final SuspectIpService suspectIpService;
 
-    public Page<BanningIp> getBannedAllIpPageable(String ip, BanningIp.BanningIpType ipType, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Specification<BanningIp> spec = Specification.where(BanningIpSpecification.hasIp(ip)).and(BanningIpSpecification.hasIpType(ipType));
-        return banningIpRepository.findAll(spec,pageable);
-    }
+  public Page<BanningIp> getBannedAllIpPageable(
+      String ip, BanningIp.BanningIpType ipType, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    Specification<BanningIp> spec =
+        Specification.where(BanningIpSpecification.hasIp(ip))
+            .and(BanningIpSpecification.hasIpType(ipType));
+    return banningIpRepository.findAll(spec, pageable);
+  }
 
-    public List<BanningIp> getBannedAllIp(){
-        return banningIpRepository.findAll();
-    }
+  public List<BanningIp> getBannedAllIp() {
+    return banningIpRepository.findAll();
+  }
 
-    public void addAllIp(List<BanningIp> banningIps) {
-        List<String> ipList = banningIps.stream().map(BanningIp::getIp).toList();
-        List<BanningIp> existingIpAddress = banningIpRepository.findByIpIn(ipList);
-        List<BanningIp> filteredIpAddress = banningIps.stream()
-                .filter(ip -> existingIpAddress
-                        .stream()
+  public void addAllIp(List<BanningIp> banningIps) {
+    List<String> ipList = banningIps.stream().map(BanningIp::getIp).toList();
+    List<BanningIp> existingIpAddress = banningIpRepository.findByIpIn(ipList);
+    List<BanningIp> filteredIpAddress =
+        banningIps.stream()
+            .filter(
+                ip ->
+                    existingIpAddress.stream()
                         .noneMatch(existingIp -> existingIp.getIp().equals(ip.getIp())))
-                .toList();
-        banningIpRepository.saveAll(filteredIpAddress);
-    }
+            .toList();
+    banningIpRepository.saveAll(filteredIpAddress);
+  }
 
-    public void addBannedIp(BanningIp banningIp) {
-        Optional<BanningIp> existingBannedIp = banningIpRepository.findFirstByIp(banningIp.getIp());
-        if (existingBannedIp.isPresent()) {
-            throw new BadRequestException("Bu ip zaten engellenmiş.");
-        }
-        banningIpRepository.save(banningIp);
+  public void addBannedIp(BanningIp banningIp) {
+    Optional<BanningIp> existingBannedIp = banningIpRepository.findFirstByIp(banningIp.getIp());
+    if (existingBannedIp.isPresent()) {
+      throw new BadRequestException("Bu ip zaten engellenmiş.");
     }
+    banningIpRepository.save(banningIp);
+  }
 
-    public void deleteIpAddresses(List<String> ipList) {
-        List<BanningIp> banningIpList = banningIpRepository.findByIpIn(ipList);
-        if (!banningIpList.isEmpty()) {
-            banningIpRepository.deleteAll(banningIpList);
-        }
+  public void deleteIpAddresses(List<String> ipList) {
+    List<BanningIp> banningIpList = banningIpRepository.findByIpIn(ipList);
+    if (!banningIpList.isEmpty()) {
+      banningIpRepository.deleteAll(banningIpList);
     }
+  }
 
-    public boolean isHaveAnyIP(String ip) {
-        Optional<BanningIp> optionalBanningIp = banningIpRepository.findFirstByIp(ip);
-        return optionalBanningIp.isPresent();
-    }
+  public boolean isHaveAnyIP(String ip) {
+    return banningIpRepository.existsByIp(ip);
+  }
 
   public List<Result> banThisIpList(List<BanIpRequest> banIpRequestList) {
     List<Result> resultList = new ArrayList<>();
@@ -96,11 +100,11 @@ public class BanningIpService {
                         "%s veritabanında vardı ama dosyada yoktu. Dosyaya eklendi.",
                         banIpRequest.ip())));
           } else {
-              if (banIpRequest.ipType() == BanningIp.BanningIpType.LISTENER) {
-                  suspectIpService.changeStatus(SuspectIP.IpStatus.BANNED, banIpRequest.ip());
-              }
-              fileService.addIPAddress(banIpRequest.ip());
-              addBannedIp(
+            if (banIpRequest.ipType() == BanningIp.BanningIpType.LISTENER) {
+              suspectIpService.changeStatus(SuspectIP.IpStatus.BANNED, banIpRequest.ip());
+            }
+            fileService.addIPAddress(banIpRequest.ip());
+            addBannedIp(
                 BanningIp.builder()
                     .ip(banIpRequest.ip())
                     .ipType(banIpRequest.ipType())
@@ -124,7 +128,6 @@ public class BanningIpService {
     deleteIpAddresses(ipList);
     banIpRequestList.forEach(
         banIpRequest -> {
-
           if (fileService.isHaveAnyIp(banIpRequest.ip())) {
             fileService.removeIPAddress(banIpRequest.ip());
           }

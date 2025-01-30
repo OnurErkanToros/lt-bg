@@ -6,43 +6,53 @@ import org.lt.project.exception.customExceptions.ResourceNotFoundException;
 import org.lt.project.model.GeoIPCountry;
 import org.lt.project.repository.GeoIPCountryRepository;
 import org.lt.project.util.converter.GeoIPCountryConverter;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class GeoIPCountryService {
     private final GeoIPCountryRepository geoIPCountryRepository;
 
-    public List<GeoIPCountryResponse> getAllAllowedCountry() {
-        return geoIPCountryRepository.findAll().stream().map(GeoIPCountryConverter::convert).toList();
+    public List<GeoIPCountryResponse> getAllCountry() {
+        return geoIPCountryRepository.findAll(Sort.by(Sort.Order.desc("allowed")))
+                .stream()
+                .map(GeoIPCountryConverter::convert)
+                .toList();
     }
 
     public boolean isAllowed(String isoCode) {
-        return geoIPCountryRepository.existsByIsoCodeAndAllowed(isoCode,true);
+        return geoIPCountryRepository.existsByIsoCodeAndAllowed(isoCode, true);
     }
 
+    public List<GeoIPCountryResponse> markAsAllowed(List<Integer> ids) {
+        List<GeoIPCountry> countries = geoIPCountryRepository.findAllById(ids);
 
-    public GeoIPCountryResponse markAsAllowed(int id){
-        Optional<GeoIPCountry> geoIPCountryOptional = geoIPCountryRepository.findById(id);
-        if (geoIPCountryOptional.isPresent()) {
-            geoIPCountryOptional.get().setAllowed(true);
-            return GeoIPCountryConverter.convert(geoIPCountryRepository.save(geoIPCountryOptional.get()));
-        } else {
-            throw new ResourceNotFoundException("Böyle bir kayıt bulunamadı.");
+        if (countries.size() != ids.size()) {
+            throw new ResourceNotFoundException("Bazı ülkeler bulunamadı.");
         }
+
+        countries.forEach(country -> country.setAllowed(true));
+        return geoIPCountryRepository.saveAll(countries)
+                .stream()
+                .map(GeoIPCountryConverter::convert)
+                .collect(Collectors.toList());
     }
 
-    public GeoIPCountryResponse markAsDenied(int id){
-        Optional<GeoIPCountry> geoIPCountryOptional = geoIPCountryRepository.findById(id);
-        if (geoIPCountryOptional.isPresent()) {
-            geoIPCountryOptional.get().setAllowed(false);
-            return GeoIPCountryConverter.convert(geoIPCountryRepository.save(geoIPCountryOptional.get()));
-        } else {
-            throw new ResourceNotFoundException("Böyle bir kayıt bulunamadı.");
+    public List<GeoIPCountryResponse> markAsDenied(List<Integer> ids) {
+        List<GeoIPCountry> countries = geoIPCountryRepository.findAllById(ids);
+
+        if (countries.size() != ids.size()) {
+            throw new ResourceNotFoundException("Bazı ülkeler bulunamadı.");
         }
-    }
 
+        countries.forEach(country -> country.setAllowed(false));
+        return geoIPCountryRepository.saveAll(countries)
+                .stream()
+                .map(GeoIPCountryConverter::convert)
+                .collect(Collectors.toList());
+    }
 }

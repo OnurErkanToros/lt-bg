@@ -94,7 +94,7 @@ public class SettingsService {
                 .key("maxMindDatabaseCountryFilePath")
                 .title("maxmind database konumu")
                 .variableType(Settings.VariableType.STRING)
-                .value("/var/lib/GeoIP/GeoLite2-Country.mmdb")
+                .value("/usr/share/GeoIP/GeoLite2-Country.mmdb")
                 .build());
         settingsRepository.save(setting);
       }

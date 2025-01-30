@@ -1,8 +1,13 @@
 package org.lt.project.security.config;
 
-import org.lt.project.security.filter.TokenAuthenticationFilter;
+import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lt.project.security.filter.RateLimitFilter;
+import org.lt.project.security.filter.TokenAuthenticationFilter;
+import org.lt.project.security.filter.XssFilter;
 import org.lt.project.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +18,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,17 +27,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.lt.project.security.filter.XssFilter;
-import java.util.Arrays;
-
-
 @EnableWebSecurity
 @EnableMethodSecurity
 @Configuration
 @Slf4j
+@RequiredArgsConstructor
 public class SecurityConfig {
     @Value("${spring.profiles.active:prod}")
     private String activeProfile;
@@ -40,22 +40,10 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
-    private final RateLimitFilter rateLimitFilter;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final XssFilter xssFilter;
-
-    public SecurityConfig(TokenAuthenticationFilter tokenAuthenticationFilter,
-            RateLimitFilter rateLimitFilter,
-            UserService userService,
-            XssFilter xssFilter,
-            PasswordEncoder passwordEncoder) {
-        this.tokenAuthenticationFilter = tokenAuthenticationFilter;
-        this.rateLimitFilter = rateLimitFilter;
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.xssFilter = xssFilter;
-    }
+  private final RateLimitFilter rateLimitFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -63,58 +51,83 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // Swagger erişimi için profile kontrolü
-        if ("dev".equals(activeProfile)) {
-            security.authorizeHttpRequests(x -> x
-                    .requestMatchers("/authentication/register").permitAll()
-                    .requestMatchers("/authentication/login").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    .requestMatchers("/server/**").hasRole("USER")
-                    .requestMatchers("/abuse-key/**").hasRole("USER")
-                    .requestMatchers("/abuse/**").hasRole("USER")
-                    .requestMatchers("/log-listener/**").hasRole("USER")
-                    .requestMatchers("/log-pattern/**").hasRole("USER")
-                    .requestMatchers("/suspect-ip/**").hasRole("USER")
-                    .requestMatchers("/banned-ip/**").hasRole("USER")
-                    .requestMatchers("/settings/**").hasRole("USER")
-                    .requestMatchers("/file/**").hasRole("USER")
-                    .requestMatchers("/ip-check/**").hasRole("USER")
-                    .anyRequest().authenticated());
-        } else {
-            security.authorizeHttpRequests(x -> x
-                    .requestMatchers("/authentication/create").permitAll()
-                    .requestMatchers("/authentication/login").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").denyAll() // Swagger'a erişimi engelle
-                    .requestMatchers("/server/**").hasRole("USER")
-                    .requestMatchers("/abuse-key/**").hasRole("USER")
-                    .requestMatchers("/abuse/**").hasRole("USER")
-                    .requestMatchers("/log-listener/**").hasRole("USER")
-                    .requestMatchers("/log-pattern/**").hasRole("USER")
-                    .requestMatchers("/suspect-ip/**").hasRole("USER")
-                    .requestMatchers("/banned-ip/**").hasRole("USER")
-                    .requestMatchers("/settings/**").hasRole("USER")
-                    .requestMatchers("/file/**").hasRole("USER")
-                    .requestMatchers("/ip-check/**").hasRole("USER")
-                    .anyRequest().authenticated());
-        }
+    configureAuthorizationRules(security, activeProfile.equals("dev"));
+    return security
+        .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .headers(
+            headers ->
+                headers
+                    .xssProtection(HeadersConfigurer.XXssConfig::disable)
+                    .contentSecurityPolicy(
+                        csp ->
+                            csp.policyDirectives(
+                                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+                                    + "img-src 'self' data:; font-src 'self' data:;"))
+                    .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+                    .contentTypeOptions(HeadersConfigurer.ContentTypeOptionsConfig::disable))
+        .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(rateLimitFilter, TokenAuthenticationFilter.class)
+        .addFilterBefore(xssFilter, RateLimitFilter.class)
+        .build();
+  }
 
-        return security
-                .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider())
-                .headers(headers -> headers
-                    .xssProtection(xss -> xss.disable())
-                    .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-                    .frameOptions(frame -> frame.deny())
-                    .contentTypeOptions(content -> content.disable())
-                )
-                .addFilterBefore(xssFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rateLimitFilter, XssFilter.class)
-                .addFilterBefore(tokenAuthenticationFilter, RateLimitFilter.class)
-                .build();
+  private void configureAuthorizationRules(HttpSecurity security, boolean isDevProfile)
+      throws Exception {
+    if (isDevProfile) {
+      security.authorizeHttpRequests(
+          x ->
+              x.requestMatchers("/authentication/register")
+                  .permitAll()
+                  .requestMatchers("/authentication/login")
+                  .permitAll()
+                  .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+                  .permitAll()
+                  .requestMatchers(
+                      "/server/**",
+                      "/abuse-key/**",
+                      "/abuse/**",
+                      "/log-listener/**",
+                      "/log-pattern/**",
+                      "/suspect-ip/**",
+                      "/banned-ip/**",
+                      "/settings/**",
+                      "/file/**",
+                      "/geo-ip-countries/**")
+                  .hasRole("USER")
+                  .requestMatchers("/ip-check/**")
+                  .permitAll()
+                  .anyRequest()
+                  .authenticated());
+    } else {
+      security.authorizeHttpRequests(
+          x ->
+              x.requestMatchers("/authentication/create")
+                  .permitAll()
+                  .requestMatchers("/authentication/login")
+                  .permitAll()
+                  .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+                  .denyAll()
+                  .requestMatchers(
+                      "/server/**",
+                      "/abuse-key/**",
+                      "/abuse/**",
+                      "/log-listener/**",
+                      "/log-pattern/**",
+                      "/suspect-ip/**",
+                      "/banned-ip/**",
+                      "/settings/**",
+                      "/file/**")
+                  .hasRole("USER")
+                  .requestMatchers("/ip-check/**")
+                  .permitAll()
+                  .anyRequest()
+                  .authenticated());
     }
+  }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
@@ -127,8 +140,8 @@ public class SecurityConfig {
 
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Origins

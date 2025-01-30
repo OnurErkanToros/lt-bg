@@ -9,6 +9,7 @@ public class GeoIPCountryConverter {
                 .id(geoIPCountry.getId())
                 .countryName(geoIPCountry.getCountryName())
                 .isoCode(geoIPCountry.getIsoCode())
+                .allowed(geoIPCountry.isAllowed())
                 .createdBy(geoIPCountry.getCreatedBy())
                 .createdAt(geoIPCountry.getCreatedAt())
                 .build();
