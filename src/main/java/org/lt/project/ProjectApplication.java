@@ -10,16 +10,11 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @SpringBootApplication
 @RequiredArgsConstructor
-public class ProjectApplication  implements CommandLineRunner {
+public class ProjectApplication {
     private final TelegramBotService telegramBotService;
 
     public static void main(String[] args) {
         SpringApplication.run(ProjectApplication.class, args);
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        telegramBotsApi.registerBot(telegramBotService);
-    }
 }

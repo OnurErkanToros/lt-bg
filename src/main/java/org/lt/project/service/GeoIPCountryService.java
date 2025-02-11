@@ -18,7 +18,7 @@ public class GeoIPCountryService {
     private final GeoIPCountryRepository geoIPCountryRepository;
 
     public List<GeoIPCountryResponse> getAllCountry() {
-        return geoIPCountryRepository.findAll(Sort.by(Sort.Order.desc("allowed")))
+        return geoIPCountryRepository.findAll(Sort.by(Sort.Order.asc("countryName")))
                 .stream()
                 .map(GeoIPCountryConverter::convert)
                 .toList();

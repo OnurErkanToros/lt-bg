@@ -6,12 +6,10 @@ import org.lt.project.exception.customExceptions.*;
 import org.lt.project.service.TelegramBotService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.validation.ValidationException;
-import org.springframework.security.core.AuthenticationException;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -28,7 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException ex) {
-        telegramBotService.sendMessage("Exception occurred: " + ex.getMessage());
+        telegramBotService.sendMessage("Exception occurred: " + ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));

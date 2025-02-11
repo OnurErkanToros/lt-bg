@@ -102,8 +102,8 @@ public class SecurityConfig {
     } else {
       security.authorizeHttpRequests(
           x ->
-              x.requestMatchers("/authentication/create")
-                  .permitAll()
+              x.requestMatchers("/authentication/register")
+                  .denyAll()
                   .requestMatchers("/authentication/login")
                   .permitAll()
                   .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
@@ -117,7 +117,8 @@ public class SecurityConfig {
                       "/suspect-ip/**",
                       "/banned-ip/**",
                       "/settings/**",
-                      "/file/**")
+                      "/file/**",
+                      "/geo-ip-countries/**")
                   .hasRole("USER")
                   .requestMatchers("/ip-check/**")
                   .permitAll()

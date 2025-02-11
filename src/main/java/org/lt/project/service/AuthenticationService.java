@@ -9,6 +9,7 @@ import org.lt.project.dto.UserRegisterResponseDto;
 import org.lt.project.exception.customExceptions.BadRequestException;
 import org.lt.project.exception.customExceptions.UnauthorizedException;
 import org.lt.project.model.User;
+import org.lt.project.repository.UserRepository;
 import org.lt.project.security.service.JwtTokenService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -62,5 +63,20 @@ public class AuthenticationService {
                 .token(jwtTokenService.generateToken(user.getUsername()))
                 .message("Kullanıcı başarıyla oluşturuldu")
                 .build();
+    }
+
+    public boolean isValidUsername(String username) {
+        if (username == null || username.length() < 4) {
+            return false;
+        }
+        if(userService.existsByUsername(username)){
+            return false;
+        }
+        return username.matches("[a-zA-Z0-9]+");
+
+    }
+
+    public boolean isValidPassword(String password) {
+        return password != null && password.length() >= 6;
     }
 }
