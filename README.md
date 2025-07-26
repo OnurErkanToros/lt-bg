@@ -6,7 +6,40 @@
 [![Docker](https://img.shields.io/badge/Docker-Container-blue.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Modern, güvenli ve ölçeklenebilir Spring Boot backend uygulaması. Enterprise-level özellikler ile donatılmış, mikroservis mimarisine uygun geliştirilmiş bir RESTful API projesi.
+## 🎯 Proje Amacı
+
+**LT (Log Tracking) Backend Application**, sunucu güvenliği ve log yönetimi için geliştirilmiş kapsamlı bir backend sistemidir. Bu uygulama, sistem yöneticilerinin ve güvenlik uzmanlarının sunucu loglarını izlemesine, şüpheli IP adreslerini tespit etmesine ve güvenlik tehditlerine karşı proaktif önlemler almasına olanak sağlar.
+
+### 🔍 Ana İşlevler
+
+#### 📊 **Log İzleme ve Analiz**
+- **Gerçek Zamanlı Log Dinleme** - Sunucu loglarını sürekli izleme
+- **Regex Pattern Matching** - Özel regex desenleri ile log analizi
+- **Log Filtreleme** - Belirli kriterlere göre log filtreleme
+- **Log İstatistikleri** - Log aktivitelerinin detaylı analizi
+
+#### 🛡️ **Güvenlik Yönetimi**
+- **IP Adresi Kontrolü** - AbuseIPDB entegrasyonu ile IP güvenlik kontrolü
+- **Blacklist Yönetimi** - Şüpheli IP'leri blacklist'e ekleme
+- **Otomatik Ban Sistemi** - Tehlikeli IP'leri otomatik engelleme
+- **Coğrafi Konum Tespiti** - IP adreslerinin coğrafi konumunu belirleme
+
+#### 🔐 **Kimlik Doğrulama ve Yetkilendirme**
+- **JWT Authentication** - Güvenli token tabanlı kimlik doğrulama
+- **Role-based Access Control** - Rol tabanlı erişim kontrolü
+- **API Güvenliği** - Tüm endpoint'lerin güvenli erişimi
+
+#### 📧 **Bildirim Sistemi**
+- **Email Notifications** - Güvenlik olayları için e-posta bildirimleri
+- **Telegram Bot** - Anlık Telegram bildirimleri
+- **Alert Management** - Güvenlik uyarılarının yönetimi
+
+#### 🌍 **Coğrafi Analiz**
+- **GeoIP2 Entegrasyonu** - IP adreslerinin coğrafi konumunu tespit
+- **Ülke Bazlı Filtreleme** - Belirli ülkelerden gelen trafiği filtreleme
+- **Bölgesel Güvenlik** - Coğrafi bazlı güvenlik politikaları
+
+---
 
 ## 📋 İçindekiler
 
@@ -102,6 +135,15 @@ Modern, güvenli ve ölçeklenebilir Spring Boot backend uygulaması. Enterprise
 src/main/java/org/lt/project/
 ├── config/          # Konfigürasyon sınıfları
 ├── controller/      # REST API controller'ları
+│   ├── AbuseApi.java           # IP güvenlik kontrolü
+│   ├── AuthenticationApi.java  # Kimlik doğrulama
+│   ├── BanningIpApi.java      # IP engelleme
+│   ├── FileApi.java           # Dosya işlemleri
+│   ├── GeoIPCountryController.java # Coğrafi konum
+│   ├── IpCheckController.java  # IP kontrolü
+│   ├── LogListenerApi.java    # Log dinleme
+│   ├── ServerApi.java         # Sunucu yönetimi
+│   └── SettingsApi.java       # Ayarlar
 ├── dto/            # Data Transfer Objects
 ├── exception/      # Özel exception sınıfları
 ├── model/          # Entity sınıfları
@@ -213,13 +255,44 @@ Uygulama başlatıldıktan sonra aşağıdaki endpoint'lere erişebilirsiniz:
 - **API Docs:** `http://localhost:1999/v3/api-docs`
 - **Health Check:** `http://localhost:1999/actuator/health`
 
-### Örnek API Kullanımı
-```bash
-# Health check
-curl http://localhost:1999/actuator/health
+### Ana Özellikler
 
-# API dokümantasyonu
-curl http://localhost:1999/v3/api-docs
+#### 🔍 **Log İzleme**
+```bash
+# Log dinlemeyi başlat
+curl -X POST http://localhost:1999/log-listener/start
+
+# Log dinleme durumunu kontrol et
+curl http://localhost:1999/log-listener/status
+
+# Log dinlemeyi durdur
+curl -X POST http://localhost:1999/log-listener/stop
+```
+
+#### 🛡️ **IP Güvenlik Kontrolü**
+```bash
+# IP adresini kontrol et
+curl -X POST "http://localhost:1999/abuse/check-ip?ipAddress=192.168.1.1&maxAgeInDays=30"
+
+# Blacklist'i yenile
+curl -X POST http://localhost:1999/abuse/blacklist/refresh
+
+# Blacklist'i görüntüle
+curl http://localhost:1999/abuse/blacklist/all?page=0&size=10
+```
+
+#### 🌍 **Coğrafi Konum Tespiti**
+```bash
+# IP'nin coğrafi konumunu öğren
+curl http://localhost:1999/geoip/country?ip=8.8.8.8
+```
+
+#### 🔐 **Kimlik Doğrulama**
+```bash
+# Giriş yap
+curl -X POST http://localhost:1999/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password"}'
 ```
 
 ---
@@ -230,12 +303,13 @@ Uygulama çalıştığında Swagger UI üzerinden interaktif API dokümantasyonu
 
 **URL:** `http://localhost:1999/swagger-ui.html`
 
-### Özellikler:
-- ✅ Tüm endpoint'lerin listesi
-- ✅ Request/Response örnekleri
-- ✅ Authentication bilgileri
-- ✅ Schema tanımları
-- ✅ Test edebilme özelliği
+### API Kategorileri:
+- **Authentication** - Kimlik doğrulama işlemleri
+- **Log Listener** - Log izleme ve yönetimi
+- **Abuse IP** - IP güvenlik kontrolü
+- **GeoIP** - Coğrafi konum servisleri
+- **Server Management** - Sunucu yönetimi
+- **Settings** - Sistem ayarları
 
 ---
 
@@ -257,6 +331,11 @@ boolean isValid = jwtService.validateToken(token);
 - **Role-based Access** - Rol tabanlı erişim
 - **CORS Configuration** - Cross-origin resource sharing
 - **CSRF Protection** - Cross-site request forgery koruması
+
+### IP Güvenlik Kontrolü
+- **AbuseIPDB Entegrasyonu** - Gerçek zamanlı IP kontrolü
+- **Blacklist Yönetimi** - Şüpheli IP'leri engelleme
+- **Otomatik Ban Sistemi** - Tehlikeli IP'leri otomatik engelleme
 
 ---
 
@@ -322,6 +401,11 @@ http://localhost:1999/swagger-ui.html
 - **Log Level:** `INFO` (production), `DEBUG` (development)
 - **Structured Logging:** JSON format
 
+### Güvenlik İzleme
+- **IP Kontrol Logları** - Güvenlik olaylarının kaydı
+- **Blacklist Güncellemeleri** - Engellenen IP'lerin takibi
+- **Coğrafi Konum Analizi** - IP lokasyon verilerinin kaydı
+
 ---
 
 ## 🤝 Katkıda Bulunma
@@ -364,4 +448,4 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 ---
 
-*"Modern, güvenli ve ölçeklenebilir backend uygulamaları geliştirmek için buradayız!"* 🚀
+*"Sunucu güvenliği ve log yönetimi için güçlü, güvenilir ve ölçeklenebilir çözümler geliştiriyoruz!"* 🚀
