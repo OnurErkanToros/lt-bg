@@ -5,6 +5,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.3-blue.svg)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Docker-Container-blue.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Security](https://img.shields.io/badge/Security-Secure-green.svg)](SECURITY.md)
 
 ## 🎯 Proje Amacı
 
@@ -171,38 +172,38 @@ git clone https://github.com/OnurErkanToros/lt-bg.git
 cd lt-bg
 ```
 
-### 2. Veritabanını Hazırlayın
-```sql
-CREATE DATABASE ltdb;
-CREATE USER 'ltuser'@'localhost' IDENTIFIED BY 'ltpassword';
-GRANT ALL PRIVILEGES ON ltdb.* TO 'ltuser'@'localhost';
-FLUSH PRIVILEGES;
+### 2. Environment Variables Yapılandırın
+```bash
+# .env.example dosyasını kopyalayın
+cp .env.example .env
+
+# .env dosyasını düzenleyin
+nano .env
 ```
 
-### 3. Uygulama Özelliklerini Yapılandırın
-`src/main/resources/application.yml` dosyasını düzenleyin:
+**Örnek .env dosyası:**
+```bash
+# Database Configuration
+DB_USERNAME=ltuser
+DB_PASSWORD=your_secure_database_password_here
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/ltdb
-    username: ltuser
-    password: ltpassword
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+# JWT Configuration
+JWT_SECRET_KEY=your_secure_jwt_secret_key_here_minimum_256_bits
 
-server:
-  port: 1999
+# IP Check Service
+IP_CHECK_SECRET_KEY=your_secure_ip_check_secret_key_here
 
-logging:
-  file:
-    name: ltapp.log
+# Swagger Authentication (Production)
+SWAGGER_USERNAME=admin
+SWAGGER_PASSWORD=your_secure_swagger_password_here
+```
+
+### 3. Veritabanını Hazırlayın
+```sql
+CREATE DATABASE ltdb;
+CREATE USER 'ltuser'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT ALL PRIVILEGES ON ltdb.* TO 'ltuser'@'localhost';
+FLUSH PRIVILEGES;
 ```
 
 ### 4. Uygulamayı Çalıştırın
@@ -225,6 +226,10 @@ java -jar target/lt-project-0.0.1.jar
 
 ### Docker Compose ile Hızlı Başlangıç
 ```bash
+# Environment variables'ları ayarlayın
+cp .env.example .env
+# .env dosyasını düzenleyin
+
 # Uygulamayı başlat
 docker-compose up -d
 
@@ -241,7 +246,7 @@ docker-compose down
 docker build -t lt-spring-boot-app .
 
 # Container çalıştır
-docker run -p 1999:1999 lt-spring-boot-app
+docker run -p 1999:1999 --env-file .env lt-spring-boot-app
 ```
 
 ---
@@ -315,27 +320,26 @@ Uygulama çalıştığında Swagger UI üzerinden interaktif API dokümantasyonu
 
 ## 🔐 Güvenlik
 
-### JWT Authentication
-Uygulama JWT (JSON Web Token) tabanlı kimlik doğrulama kullanır:
+### Environment Variables
+Tüm hassas bilgiler environment variables ile korunmaktadır:
 
-```java
-// Token oluşturma
-String token = jwtService.generateToken(user);
-
-// Token doğrulama
-boolean isValid = jwtService.validateToken(token);
+```properties
+# application.properties
+spring.datasource.password=${DB_PASSWORD}
+jwt.key=${JWT_SECRET_KEY}
+ipCheckService.secretKey=${IP_CHECK_SECRET_KEY}
 ```
 
-### Spring Security
+### Güvenlik Özellikleri
+- **JWT Authentication** - Token tabanlı kimlik doğrulama
+- **Spring Security** - Kapsamlı güvenlik yönetimi
 - **Password Encryption** - BCrypt şifreleme
 - **Role-based Access** - Rol tabanlı erişim
 - **CORS Configuration** - Cross-origin resource sharing
 - **CSRF Protection** - Cross-site request forgery koruması
 
-### IP Güvenlik Kontrolü
-- **AbuseIPDB Entegrasyonu** - Gerçek zamanlı IP kontrolü
-- **Blacklist Yönetimi** - Şüpheli IP'leri engelleme
-- **Otomatik Ban Sistemi** - Tehlikeli IP'leri otomatik engelleme
+### Güvenlik Rehberi
+Detaylı güvenlik bilgileri için [SECURITY.md](SECURITY.md) dosyasına bakın.
 
 ---
 
@@ -421,6 +425,7 @@ http://localhost:1999/swagger-ui.html
 - ✅ Unit test yazın
 - ✅ API dokümantasyonunu güncelleyin
 - ✅ Commit mesajlarını açıklayıcı yazın
+- ✅ Güvenlik best practices uygulayın
 
 ---
 
@@ -448,4 +453,4 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 ---
 
-*"Sunucu güvenliği ve log yönetimi için güçlü, güvenilir ve ölçeklenebilir çözümler geliştiriyoruz!"* 🚀
+*"Modern, güvenli ve ölçeklenebilir backend uygulamaları geliştirmek için buradayız!"* 🚀
