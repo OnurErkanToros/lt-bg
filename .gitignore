@@ -32,5 +32,51 @@ build/
 ### VS Code ###
 .vscode/
 
-### error.log ###
-error.log
+### Security Files ###
+.env
+.env.local
+.env.production
+.env.development
+application-local.properties
+application-secret.properties
+application-private.properties
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+secrets/
+config/secrets/
+src/main/resources/secrets/
+src/main/resources/private/
+
+### Logs ###
+*.log
+logs/
+log/
+
+### OS Generated Files ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+### Database Files ###
+*.db
+*.sqlite
+*.sqlite3
+
+### Backup Files ###
+*.bak
+*.backup
+*.old
